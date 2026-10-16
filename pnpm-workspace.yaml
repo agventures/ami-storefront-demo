@@ -1,0 +1,9 @@
+# pnpm's settings for this folder, which is a project of its own rather than
+# a member of a pnpm workspace.
+nodeLinker: hoisted
+# Packages allowed to run install scripts. With pnpm 12.6 none of today's
+# dependencies has one (sharp and @tailwindcss/oxide ship prebuilt binaries),
+# so these two are listed only so a platform that needs to build them can.
+allowBuilds:
+  sharp: true
+  '@tailwindcss/oxide': true

@@ -1,0 +1,18 @@
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# env files: the real keys live only here, never in git
+.env*.local
+.env
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
