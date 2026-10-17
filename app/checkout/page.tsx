@@ -17,7 +17,7 @@ export default async function CheckoutPage() {
 
   return (
     <div className="space-y-5">
-      <Link href="/carrito" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
+      <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
         <ArrowLeftIcon width={16} height={16} /> Volver al carrito
       </Link>
       <h1 className="text-2xl font-extrabold tracking-tight">Finalizar compra</h1>

@@ -12,7 +12,7 @@ export function CartLink() {
 
   return (
     <Link
-      href="/carrito"
+      href="/cart"
       aria-label={label}
       className="relative inline-flex size-11 items-center justify-center rounded-full bg-white text-ink shadow-sm ring-1 ring-line transition-colors hover:bg-brand-soft"
     >

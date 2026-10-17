@@ -177,7 +177,7 @@ export function AddToCart({ product }: { product: Product }) {
         {added ? (
           <p className="flex flex-wrap items-center gap-2 font-medium text-emerald-700">
             <CheckIcon width={18} height={18} /> Agregado al carrito.
-            <Link href="/carrito" className="text-brand-ink underline underline-offset-2">
+            <Link href="/cart" className="text-brand-ink underline underline-offset-2">
               Ver carrito
             </Link>
           </p>

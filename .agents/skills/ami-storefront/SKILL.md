@@ -41,5 +41,5 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 - Olvidar la cédula del cliente: `customer.name`, `customer.phone` y `customer.cedula` son obligatorios para crear el pedido.
 - Pedir el catálogo en cada visita sin caché: usa `ETag`/`If-None-Match` o revalida con el webhook `catalog.changed`.
 - Reintentar `POST /orders` sin `Idempotency-Key` y crear el pedido dos veces.
-- Guardar la referencia del pedido en una cookie para la página de retorno: no hace falta, pon `{reference}` en `return_url` (`https://tusitio.com/pedido/{reference}`).
+- Guardar la referencia del pedido en una cookie para la página de retorno: no hace falta, pon `{reference}` en `return_url` (`https://tusitio.com/order/{reference}`).
 - Exponer `GET /orders?phone=` sin verificar al cliente (ver [references/flujo-de-compra.md](references/flujo-de-compra.md) § 6).

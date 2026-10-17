@@ -101,10 +101,10 @@ export async function placeOrder(input: CheckoutInput) {
       customer: { name: input.name, phone: input.phone, cedula: input.cedula, email: input.email },
       note: input.note,
       // Ami replaces `{reference}` with the order's reference.
-      return_url: `${process.env.SITE_URL}/pedido/{reference}`,
+      return_url: `${process.env.SITE_URL}/order/{reference}`,
     }),
   })
-  redirect(order.payment_url ?? `/pedido/${order.reference}`)
+  redirect(order.payment_url ?? `/order/${order.reference}`)
 }
 ```
 

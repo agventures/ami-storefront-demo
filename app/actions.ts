@@ -147,7 +147,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         customer,
         note: text(input.note, 300),
         // Ami puts the order's reference where `{reference}` is.
-        return_url: `${siteUrl()}/pedido/{reference}`,
+        return_url: `${siteUrl()}/order/{reference}`,
         metadata: { checkout_attempt: attemptId },
       },
       attemptId,
@@ -235,7 +235,7 @@ export async function bookAppointment(input: {
         start,
         customer,
         note: text(input.note, 500),
-        return_url: `${siteUrl()}/citas/gracias`,
+        return_url: `${siteUrl()}/appointments/thanks`,
       },
       attemptId,
     )

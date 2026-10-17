@@ -19,7 +19,7 @@ export default async function ThanksPage() {
       <div className="mx-auto max-w-xl space-y-4 py-10 text-center">
         <h1 className="text-2xl font-extrabold tracking-tight">No encontramos tu pedido en este navegador</h1>
         <p className="text-muted">Si ya pagaste, puedes buscarlo con tu número de teléfono.</p>
-        <Link href="/mis-pedidos" className="btn-primary">
+        <Link href="/my-orders" className="btn-primary">
           Buscar mis pedidos
         </Link>
       </div>

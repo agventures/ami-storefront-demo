@@ -23,11 +23,11 @@ export function SiteHeader({ store }: { store: Store | null }) {
 
         <nav aria-label="Principal" className="ml-auto flex items-center gap-1 text-sm font-medium">
           {store?.modules?.booking && (
-            <Link href="/citas" className="hidden rounded-full px-3 py-2 hover:bg-brand-soft sm:inline-flex">
+            <Link href="/appointments" className="hidden rounded-full px-3 py-2 hover:bg-brand-soft sm:inline-flex">
               Citas
             </Link>
           )}
-          <Link href="/mis-pedidos" className="hidden rounded-full px-3 py-2 hover:bg-brand-soft sm:inline-flex">
+          <Link href="/my-orders" className="hidden rounded-full px-3 py-2 hover:bg-brand-soft sm:inline-flex">
             Mis pedidos
           </Link>
           <CartLink />

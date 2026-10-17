@@ -19,7 +19,7 @@ export function ProductCard({ product, bookable }: { product: Product; bookable:
   const image = product.image_url ?? product.media.find((m) => m.kind === 'image')?.thumb_url ?? null
   return (
     <Link
-      href={`/producto/${encodeURIComponent(product.id)}`}
+      href={`/product/${encodeURIComponent(product.id)}`}
       className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-white transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-square overflow-hidden bg-brand-soft">

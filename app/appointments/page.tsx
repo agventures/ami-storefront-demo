@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { title: 'Agendar una cita' }
 
-type Props = { searchParams: Promise<{ servicio?: string | string[] }> }
+type Props = { searchParams: Promise<{ service?: string | string[] }> }
 
 export default async function BookingPage({ searchParams }: Props) {
   const store = await getStore()
@@ -15,7 +15,7 @@ export default async function BookingPage({ searchParams }: Props) {
   if (!store.modules?.booking) notFound()
 
   const [menu, params] = await Promise.all([getBookingMenu(), searchParams])
-  const service = Array.isArray(params.servicio) ? params.servicio[0] : params.servicio
+  const service = Array.isArray(params.service) ? params.service[0] : params.service
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">

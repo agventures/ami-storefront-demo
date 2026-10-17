@@ -49,7 +49,7 @@ export default async function ProductPage({ params }: Props) {
           <Description markdown={product.description} />
 
           {bookable ? (
-            <Link href={`/citas?servicio=${encodeURIComponent(product.id)}`} className="btn-primary w-full sm:w-auto">
+            <Link href={`/appointments?service=${encodeURIComponent(product.id)}`} className="btn-primary w-full sm:w-auto">
               <CalendarIcon width={18} height={18} /> Agendar cita
             </Link>
           ) : (

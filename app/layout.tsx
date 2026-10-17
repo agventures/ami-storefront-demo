@@ -69,11 +69,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           </p>
           <p className="mt-2 flex justify-center gap-4 sm:hidden">
             {store?.modules?.booking && (
-              <Link href="/citas" className="underline underline-offset-2">
+              <Link href="/appointments" className="underline underline-offset-2">
                 Citas
               </Link>
             )}
-            <Link href="/mis-pedidos" className="underline underline-offset-2">
+            <Link href="/my-orders" className="underline underline-offset-2">
               Mis pedidos
             </Link>
           </p>

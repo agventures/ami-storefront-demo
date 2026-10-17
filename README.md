@@ -18,12 +18,12 @@ bancarios.
 | Ruta | Qué hace |
 | --- | --- |
 | `/` | La tienda: nombre, logo y horario (`GET /store`, sin caché), aviso de «Cerrado» y el catálogo por categorías (`GET /catalog`, con caché de 5 minutos que el webhook invalida). |
-| `/producto/[id]` | El producto: fotos y videos, descripción, presentaciones, opciones con sus mínimos y máximos, cantidad y nota. |
-| `/carrito` | El carrito (solo las líneas, en `localStorage`), cotizado con `POST /quote` cada vez que cambia; muestra los totales y los motivos de rechazo tal como los escribe Ami, y el código de descuento si la tienda lo usa. |
+| `/product/[id]` | El producto: fotos y videos, descripción, presentaciones, opciones con sus mínimos y máximos, cantidad y nota. |
+| `/cart` | El carrito (solo las líneas, en `localStorage`), cotizado con `POST /quote` cada vez que cambia; muestra los totales y los motivos de rechazo tal como los escribe Ami, y el código de descuento si la tienda lo usa. |
 | `/checkout` | Datos del cliente (nombre, teléfono y cédula obligatorios), retiro con horario o delivery con «Usar mi ubicación», y `POST /orders` con `Idempotency-Key`. Al crearse el pedido, el cliente va a `payment_url`. |
-| `/pedido/[reference]` | La página a la que vuelve el cliente después de pagar (`return_url` es `SITE_URL/pedido/{reference}`): lee el pedido en Ami (`GET /orders/{reference}`) y se actualiza sola mientras espera el pago o la aprobación. Solo muestra pedidos hechos desde este navegador. |
-| `/mis-pedidos` | Los pedidos hechos desde este navegador. No busca por teléfono a propósito: cualquiera puede escribir el teléfono de otra persona. |
-| `/citas` | Solo si la tienda tiene el módulo de citas: servicio, día y hora, datos y `POST /booking/appointments`. |
+| `/order/[reference]` | La página a la que vuelve el cliente después de pagar (`return_url` es `SITE_URL/order/{reference}`): lee el pedido en Ami (`GET /orders/{reference}`) y se actualiza sola mientras espera el pago o la aprobación. Solo muestra pedidos hechos desde este navegador. |
+| `/my-orders` | Los pedidos hechos desde este navegador. No busca por teléfono a propósito: cualquiera puede escribir el teléfono de otra persona. |
+| `/appointments` | Solo si la tienda tiene el módulo de citas: servicio, día y hora, datos y `POST /booking/appointments`. |
 | `/api/ami/webhook` | Recibe los webhooks de Ami, verifica la firma `Ami-Signature` e invalida el catálogo con `catalog.changed`. |
 
 Toda llamada a Ami sale del servidor, desde `lib/ami.ts`, el único archivo que
@@ -69,7 +69,7 @@ lee `AMI_API_KEY`.
    allí con los métodos de la tienda; este sitio nunca ve datos bancarios ni
    comprobantes.
 3. Al terminar, el cliente vuelve a `return_url`
-   (`SITE_URL/pedido/{reference}`: Ami pone la referencia del pedido en lugar
+   (`SITE_URL/order/{reference}`: Ami pone la referencia del pedido en lugar
    de `{reference}`). El checkout además guarda la referencia en una cookie
    `httpOnly`, para «Mis pedidos».
 4. La página de retorno **no supone** que se pagó porque el cliente volvió:

@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `Pedido ${(await params).reference}` }
 }
 
-// The `return_url` of every order (`/pedido/{reference}`), and «Mis pedidos»'
+// The `return_url` of every order (`/order/{reference}`), and «Mis pedidos»'
 // link. Coming back here proves nothing (rule 6): the page asks Ami. And a
 // reference is not a password: the site's key reads every order the site
 // made, so the page shows only the ones this browser placed.

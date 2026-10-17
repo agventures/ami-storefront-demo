@@ -21,7 +21,7 @@ export default async function AppointmentThanksPage() {
     return (
       <div className="mx-auto max-w-xl space-y-4 py-10 text-center">
         <h1 className="text-2xl font-extrabold tracking-tight">No encontramos tu cita en este navegador</h1>
-        <Link href="/citas" className="btn-primary">
+        <Link href="/appointments" className="btn-primary">
           Agendar una cita
         </Link>
       </div>

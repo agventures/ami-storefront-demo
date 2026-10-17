@@ -29,7 +29,7 @@ export default async function MyOrdersPage() {
           {orders.map((order) => (
             <li key={order.reference}>
               <Link
-                href={`/pedido/${encodeURIComponent(order.reference)}`}
+                href={`/order/${encodeURIComponent(order.reference)}`}
                 className="flex items-center justify-between gap-4 p-4 hover:bg-brand-soft/50"
               >
                 <span className="min-w-0">

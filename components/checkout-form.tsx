@@ -110,7 +110,7 @@ export function CheckoutForm({
       if (result.status === 'created') {
         // The order exists: the cart has done its job.
         cartActions.clear()
-        window.location.assign(result.paymentUrl ?? `/pedido/${encodeURIComponent(result.reference)}`)
+        window.location.assign(result.paymentUrl ?? `/order/${encodeURIComponent(result.reference)}`)
         return
       }
       if (result.status === 'refused') {
