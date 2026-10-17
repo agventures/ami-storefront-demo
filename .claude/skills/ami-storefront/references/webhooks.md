@@ -16,7 +16,7 @@ import crypto from 'node:crypto'
 import { revalidateTag } from 'next/cache'
 
 export async function POST(req: Request) {
-  const raw = await req.text()                       // el cuerpo crudo, antes de JSON.parse
+  const raw = await req.text()                       // the raw body, before JSON.parse
   const parts = Object.fromEntries((req.headers.get('ami-signature') ?? '').split(',')
     .map(p => p.split('=') as [string, string]))
   const expected = crypto.createHmac('sha256', process.env.AMI_WEBHOOK_SECRET!)

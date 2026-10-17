@@ -8,12 +8,18 @@
 //   built file — keys belong in the server's environment, never in code;
 // - the key is exposed through a browser-visible env prefix
 //   (NEXT_PUBLIC_, VITE_, PUBLIC_, REACT_APP_, NUXT_PUBLIC_, EXPO_PUBLIC_);
-// - AMI_API_KEY is read in a file that runs in the browser ('use client').
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+// - AMI_API_KEY is read in a client component, a file that runs in the
+//   browser.
+//
+// The skill's own folder is left out wherever it is installed: its notes
+// and this file name the key on purpose.
+import { readdirSync, readFileSync, realpathSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const root = process.argv[2] ?? process.cwd()
 const SKIP = new Set(['node_modules', '.git', '.agents', '.claude'])
+const SELF = realpathSync(fileURLToPath(new URL('..', import.meta.url)))
 const BUILT = ['.next/static', 'out', 'dist', 'build', '.output/public']
 const TEXT = /\.(m?[jt]sx?|json|html|css|env|ya?ml|md|vue|svelte|astro)$|^\.env/
 const SECRET = /\bami_(live|test)_[A-Za-z0-9_-]{24,}/
@@ -30,6 +36,7 @@ function walk(dir, { built = false } = {}) {
     let info
     try { info = statSync(path) } catch { continue }
     if (info.isDirectory()) {
+      if (realpathSync(path) === SELF) continue
       // Build output is checked separately and whole; skip it here.
       if (!built && ['.next', 'out', 'dist', 'build', '.output'].includes(name)) continue
       walk(path, { built })

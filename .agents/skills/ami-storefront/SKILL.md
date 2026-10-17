@@ -1,6 +1,8 @@
 ---
 name: ami-storefront
 description: Construye o modifica una tienda en línea propia que vende con Ami a través de la API de tiendas (api.amiagente.com/v1/storefront) — catálogo, carrito, cotización, pedidos con pago en la página de Ami, citas, reservas, suscripciones y webhooks. Úsalo cuando el proyecto use AMI_API_KEY, llame a api.amiagente.com, o te pidan una tienda, un checkout o un catálogo "conectado a Ami".
+license: MIT
+compatibility: Necesita acceso a api.amiagente.com, una llave de Ami (AMI_API_KEY) y Node.js para scripts/check-key-leak.mjs.
 ---
 
 # Tienda propia conectada a Ami
@@ -19,12 +21,12 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 
 ## Cómo trabajar
 
-1. Lee `references/api.md` (endpoints y campos). Si dudas de un campo, consulta https://docs.amiagente.com/docs/referencia o pide `GET https://api.amiagente.com/v1/storefront/openapi.json`.
+1. Lee [references/api.md](references/api.md) (endpoints y campos). Si dudas de un campo, consulta https://docs.amiagente.com/docs/referencia o pide `GET https://api.amiagente.com/v1/storefront/openapi.json`.
 2. Mira la tienda real con la llave de prueba antes de diseñar: `curl -H "Authorization: Bearer $AMI_API_KEY" https://api.amiagente.com/v1/storefront/store` y `/catalog`. Diseña para lo que el negocio vende (presentaciones, opciones, servicios, módulos).
-3. Sigue `references/flujo-de-compra.md` para el carrito, la cotización, el pedido y el retorno.
-4. Si `store.modules` tiene `booking`, `hotel` o `subscriptions` y te piden eso, ver `references/modulos.md`.
-5. Webhooks: `references/webhooks.md`.
-6. Prueba de punta a punta con la llave de prueba (`references/modo-de-prueba.md`): crea un pedido, abre `payment_url`, pulsa **Simular pago aprobado**, vuelve a tu sitio y comprueba que muestra el pedido pagado.
+3. Sigue [references/flujo-de-compra.md](references/flujo-de-compra.md) para el carrito, la cotización, el pedido y el retorno.
+4. Si `store.modules` tiene `booking`, `hotel` o `subscriptions` y te piden eso, ver [references/modulos.md](references/modulos.md).
+5. Webhooks: [references/webhooks.md](references/webhooks.md).
+6. Prueba de punta a punta con la llave de prueba ([references/modo-de-prueba.md](references/modo-de-prueba.md)): crea un pedido, abre `payment_url`, pulsa **Simular pago aprobado**, vuelve a tu sitio y comprueba que muestra el pedido pagado.
 7. Corre el chequeo de la llave y el build del proyecto.
 
 ## Rechazos que vas a ver (`refusals[].code`)
@@ -40,4 +42,4 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 - Pedir el catálogo en cada visita sin caché: usa `ETag`/`If-None-Match` o revalida con el webhook `catalog.changed`.
 - Reintentar `POST /orders` sin `Idempotency-Key` y crear el pedido dos veces.
 - Guardar la referencia del pedido en una cookie para la página de retorno: no hace falta, pon `{reference}` en `return_url` (`https://tusitio.com/pedido/{reference}`).
-- Exponer `GET /orders?phone=` sin verificar al cliente (ver `flujo-de-compra.md` § 6).
+- Exponer `GET /orders?phone=` sin verificar al cliente (ver [references/flujo-de-compra.md](references/flujo-de-compra.md) § 6).

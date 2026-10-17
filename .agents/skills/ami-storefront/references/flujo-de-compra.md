@@ -75,7 +75,7 @@ Llámala cuando cambie el carrito (con un pequeño debounce) y pinta exactamente
 Un formulario con nombre, teléfono y cédula (obligatorios), correo (opcional), forma de entrega (solo las de `store.fulfillment`) y, para delivery, la ubicación (obligatoria) y la dirección con un punto de referencia (opcionales, pero el repartidor las agradece):
 
 ```ts
-// En el cliente: la ubicación para el delivery
+// In the browser: the location for a delivery
 navigator.geolocation.getCurrentPosition(
   p => setPin({ latitude: p.coords.latitude, longitude: p.coords.longitude }),
   () => setError('Necesitamos tu ubicación para calcular el delivery'),
@@ -91,7 +91,7 @@ import { redirect } from 'next/navigation'
 export async function placeOrder(input: CheckoutInput) {
   const order = await ami<Order>('/orders', {
     method: 'POST',
-    idempotencyKey: input.attemptId,          // uno por intento de compra
+    idempotencyKey: input.attemptId,          // one per checkout attempt
     body: JSON.stringify({
       lines: input.lines,
       fulfillment: input.fulfillment,
@@ -100,7 +100,7 @@ export async function placeOrder(input: CheckoutInput) {
       address: input.address,
       customer: { name: input.name, phone: input.phone, cedula: input.cedula, email: input.email },
       note: input.note,
-      // `{reference}` lo reemplaza Ami por la referencia del pedido.
+      // Ami replaces `{reference}` with the order's reference.
       return_url: `${process.env.SITE_URL}/pedido/{reference}`,
     }),
   })

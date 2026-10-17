@@ -135,6 +135,10 @@ node .agents/skills/ami-storefront/scripts/check-key-leak.mjs
 pnpm build
 ```
 
+El skill se publica en
+[agventures/ami-skills](https://github.com/agventures/ami-skills). Para traer
+su última versión, corre `npx skills add agventures/ami-skills`.
+
 La referencia completa de la API está en https://docs.amiagente.com (y en
 https://docs.amiagente.com/llms-full.txt, en un solo archivo para agentes).
 
