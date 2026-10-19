@@ -15,7 +15,7 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 2. **No calcules dinero.** Nunca sumes precios, multipliques por cantidad, calcules envío, IVA, IGTF, descuentos ni bolívares. Muestra los textos que devuelve Ami: `price_text`, `line_total_text`, `subtotal_text`, `delivery.fee_text`, `taxes[].amount_text`, `total_text`, `total_ves.amount_text`. El total del carrito sale de `POST /quote`, no de tu código.
 3. **El pago no es tuyo.** Crea el pedido con `POST /orders` y redirige al cliente a `payment_url`. No pidas datos bancarios, no subas comprobantes, no integres pasarelas. El cliente vuelve a `return_url`.
 4. **El carrito se cotiza cada vez que cambia.** Muestra `refusals` (y el `refusal` de cada línea) con su `message`, que ya está en español para el cliente. Si `ok` es `false`, no dejes pagar.
-5. **Respeta la tienda.** Si `GET /store` dice `accepts_orders_now: false`, muestra `hours_text` y no ofrezcas pagar. Ofrece solo las entregas de `store.fulfillment`. No dejes agregar productos con `sold_out: true`.
+5. **Respeta la tienda.** Si `GET /store` dice `accepts_orders_now: false`, muestra `hours_text` y no ofrezcas pagar. Ofrece solo las entregas de `store.fulfillment`. No dejes agregar productos con `sold_out: true`; uno con `backorder: true` sí se compra, y se muestra «Por encargo».
 6. **El estado del pedido sale de Ami.** La página de retorno lee `GET /orders/{reference}`; no supongas que se pagó porque el cliente volvió.
 7. **Textos para el cliente en español; código en inglés.**
 
@@ -40,6 +40,8 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 - Crear un delivery sin `pin` (`pin_required`): pide la ubicación con `navigator.geolocation` en el cliente y mándala a tu servidor.
 - Olvidar la cédula del cliente: `customer.name`, `customer.phone` y `customer.cedula` son obligatorios para crear el pedido.
 - Pedir el catálogo en cada visita sin caché: usa `ETag`/`If-None-Match` o revalida con el webhook `catalog.changed`.
+- Inventar un precio de antes, una marca o productos relacionados: salen de `compare_at_text`, `brand`, `accessories` y `related`. Si vienen `null` o vacíos, no muestres nada.
+- Pedir `/products/{id}` por cada tarjeta para armar «Qué incluye» o «Se lleva junto con»: los ids de `includes`, `accessories` y `related` están en el mismo catálogo.
 - Reintentar `POST /orders` sin `Idempotency-Key` y crear el pedido dos veces.
 - Guardar la referencia del pedido en una cookie para la página de retorno: no hace falta, pon `{reference}` en `return_url` (`https://tusitio.com/order/{reference}`).
 - Exponer `GET /orders?phone=` sin verificar al cliente (ver [references/flujo-de-compra.md](references/flujo-de-compra.md) § 6).

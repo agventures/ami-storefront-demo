@@ -43,14 +43,34 @@ export type Category = {
   id: string
   name: string
   position: number
+  /** The group it sits in, or null on the first level. */
+  parent_id?: string | null
+}
+
+/** One product a combo hands over. `product_id` links it, or is null when
+ *  the store does not sell it on its own. */
+export type Part = {
+  name: string
+  variant_name: string | null
+  quantity: string
+  product_id: string | null
+  variant_id: string | null
 }
 
 export type Variant = {
   variant_id: string
   name: string
+  sku?: string | null
   price: string
   price_text: string
+  /** The price before an offer, to strike through; null when none. */
+  compare_at_text?: string | null
   sold_out: boolean
+  /** None now, but it can be ordered: «Por encargo». */
+  backorder?: boolean
+  /** How many are left, only when few and the store shows it. */
+  stock_left?: number | null
+  includes?: Part[]
 }
 
 export type Option = {
@@ -87,12 +107,22 @@ export type Product = {
   category: string
   category_id: string
   kind: ProductKind | (string & {})
+  brand?: string | null
+  sku?: string | null
   price: string | null
   price_text: string
   price_from: boolean
+  compare_at_text?: string | null
   sold_out: boolean
+  backorder?: boolean
+  stock_left?: number | null
   variant_id: string | null
   variants: Variant[]
+  /** What a combo hands over («Qué incluye»). */
+  includes?: Part[]
+  /** Ids in the same catalogue: bought with it, and instead of it. */
+  accessories?: string[]
+  related?: string[]
   option_groups: OptionGroup[]
   image_url: string | null
   image_full_url: string | null

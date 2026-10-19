@@ -9,12 +9,14 @@ Errores: `{"error": {"code": "...", "message": "..."}}` — `code` en inglés (p
 | Método | Ruta | Devuelve |
 | --- | --- | --- |
 | GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}` |
-| GET | `/catalog` | `currency`, `categories[] {id, name, position}`, `products[]` (ver abajo). Con `ETag`; `If-None-Match` → `304`. |
-| GET | `/products/{id}` | Un producto |
+| GET | `/catalog` | `currency`, `categories[] {id, name, position, parent_id}`, `products[]` (ver abajo). Con `ETag`; `If-None-Match` → `304`. |
+| GET | `/products/{id}` | Un producto, por su `id` o por su código (SKU) |
 | GET | `/payment-methods` | `methods[] {id, label, settles_in, is_cash, spidi}` — solo para mostrar; el pago es en `payment_url` |
 | GET | `/shipping/offices?carrier=` | Agencias de una empresa de envío |
 
-Producto: `id`, `name`, `description` (Markdown), `category`, `category_id`, `kind` (`good`/`service`/`subscription`), `price_text`, `price_from` (escribe «desde»), `sold_out`, `variant_id`, `variants[] {variant_id, name, price_text, sold_out}`, `option_groups[] {id, name, min_select, max_select, options[] {id, name, delta_text, sold_out}}`, `image_url` (miniatura), `image_full_url`, `media[] {kind, url, thumb_url, poster_url}`.
+Producto: `id`, `name`, `brand`, `sku`, `description` (Markdown: ahí van la ficha técnica y la garantía), `category`, `category_id`, `kind` (`good`/`service`/`subscription`), `price_text`, `price_from` (escribe «desde»), `compare_at_text` (precio de antes, tachado; `null` si no hay oferta), `sold_out`, `backorder` (muestra «Por encargo» y deja comprarlo), `stock_left` («Quedan 2», o `null`), `variant_id`, `variants[] {variant_id, name, sku, price_text, compare_at_text, sold_out, backorder, stock_left, includes}`, `includes[] {name, variant_name, quantity, product_id}` (lo que trae un combo; `product_id` puede ser `null`), `accessories[]` y `related[]` (ids de productos del mismo catálogo: «Se lleva junto con», «También te puede servir»), `option_groups[] {id, name, min_select, max_select, options[] {id, name, delta_text, sold_out}}`, `image_url` (miniatura), `image_full_url`, `media[] {kind, url, thumb_url, poster_url}`.
+
+Categorías en grupos: `parent_id` es el `id` del grupo (también en `categories`) o `null` en el primer nivel; un grupo puede no tener productos propios.
 
 ## Carrito y pedidos
 

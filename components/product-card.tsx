@@ -2,15 +2,35 @@ import Link from 'next/link'
 import type { Product } from '@/lib/types'
 import { BalloonIcon } from './icons'
 
-/** «desde» is written only when Ami says the price varies. */
-export function PriceText({ product, className }: { product: Pick<Product, 'price_text' | 'price_from'>; className?: string }) {
+/** «desde» is written only when Ami says the price varies, and the price
+ *  before an offer only when Ami sends one — struck through, after it. */
+export function PriceText({ product, className }: {
+  product: Pick<Product, 'price_text' | 'price_from' | 'compare_at_text'>
+  className?: string
+}) {
   if (!product.price_text) return null
   return (
     <span className={className}>
       {product.price_from ? <span className="font-normal text-muted">desde </span> : null}
       {product.price_text}
+      {product.compare_at_text ? (
+        <s className="ml-2 text-sm font-normal text-muted">
+          <span className="sr-only">antes </span>
+          {product.compare_at_text}
+        </s>
+      ) : null}
     </span>
   )
+}
+
+/** «Por encargo», «Última unidad», «Quedan 2» — or nothing. Ami decides
+ *  when each is true; the site only says it. */
+export function stockLabel(item: Pick<Product, 'sold_out' | 'backorder' | 'stock_left'>): string | null {
+  if (item.sold_out) return null
+  if (item.backorder) return 'Por encargo'
+  if (item.stock_left === 1) return 'Última unidad'
+  if (item.stock_left) return `Quedan ${item.stock_left}`
+  return null
 }
 
 export function ProductCard({ product, bookable }: { product: Product; bookable: boolean }) {
@@ -38,11 +58,14 @@ export function ProductCard({ product, bookable }: { product: Product; bookable:
         )}
         {product.sold_out ? (
           <span className="absolute top-2 left-2 rounded-full bg-ink/85 px-2.5 py-1 text-xs font-semibold text-white">Agotado</span>
+        ) : stockLabel(product) ? (
+          <span className="absolute top-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink">{stockLabel(product)}</span>
         ) : bookable ? (
           <span className="absolute top-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink">Con cita</span>
         ) : null}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
+        {product.brand ? <p className="text-xs text-muted">{product.brand}</p> : null}
         <h3 className="line-clamp-2 text-sm leading-snug font-semibold sm:text-base">{product.name}</h3>
         <PriceText product={product} className="mt-auto text-sm font-bold text-brand-ink sm:text-base" />
       </div>

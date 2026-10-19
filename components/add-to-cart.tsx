@@ -103,7 +103,9 @@ export function AddToCart({ product }: { product: Product }) {
                   />
                   <span className="font-medium">{v.name}</span>
                 </span>
-                <span className="text-right text-muted">{v.sold_out ? 'Agotado' : v.price_text}</span>
+                <span className="text-right text-muted">
+                  {v.sold_out ? 'Agotado' : v.backorder ? `${v.price_text} · Por encargo` : v.price_text}
+                </span>
               </label>
             ))}
           </div>
