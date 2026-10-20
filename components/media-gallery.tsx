@@ -2,16 +2,18 @@
 
 import { useState } from 'react'
 import type { Media } from '@/lib/types'
-import { BalloonIcon } from './icons'
 
 export function MediaGallery({ media, fallback, name }: { media: Media[]; fallback: string | null; name: string }) {
   const items = media.filter((m) => m.url)
   const [index, setIndex] = useState(0)
+  // Only a picture the customer picked fades in; the first one is simply
+  // there when the page is.
+  const [picked, setPicked] = useState(false)
   const current = items[index]
 
   return (
     <div className="space-y-3">
-      <div className="aspect-square overflow-hidden rounded-3xl bg-brand-soft ring-1 ring-line">
+      <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-shade">
         {current?.kind === 'video' ? (
           <video
             key={current.id}
@@ -24,11 +26,14 @@ export function MediaGallery({ media, fallback, name }: { media: Media[]; fallba
             aria-label={`Video de ${name}`}
           />
         ) : current?.url || fallback ? (
-          <img src={current?.url ?? fallback ?? undefined} alt={name} className="size-full object-cover" />
+          <img
+            key={current?.id ?? 'fallback'}
+            src={current?.url ?? fallback ?? undefined}
+            alt={name}
+            className={`size-full object-cover ${picked ? 'animate-fade-in' : ''}`}
+          />
         ) : (
-          <div className="flex size-full items-center justify-center text-brand/40">
-            <BalloonIcon width={64} height={64} />
-          </div>
+          <div className="flex size-full items-center justify-center text-sm text-muted">Sin foto</div>
         )}
       </div>
 
@@ -38,10 +43,13 @@ export function MediaGallery({ media, fallback, name }: { media: Media[]; fallba
             <li key={item.id} className="shrink-0">
               <button
                 type="button"
-                onClick={() => setIndex(i)}
+                onClick={() => {
+                  setIndex(i)
+                  setPicked(true)
+                }}
                 aria-label={`${item.kind === 'video' ? 'Video' : 'Foto'} ${i + 1} de ${items.length}`}
                 aria-current={i === index}
-                className={`relative block size-16 overflow-hidden rounded-xl ring-2 transition ${i === index ? 'ring-brand' : 'ring-transparent opacity-75 hover:opacity-100'}`}
+                className={`relative block h-20 w-16 overflow-hidden rounded-lg bg-shade ring-1 transition-opacity duration-150 ${i === index ? 'ring-ink' : 'ring-transparent opacity-70 hover:opacity-100'}`}
               >
                 <img src={item.thumb_url ?? item.poster_url ?? item.url ?? ''} alt="" className="size-full object-cover" />
                 {item.kind === 'video' && (

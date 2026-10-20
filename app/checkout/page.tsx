@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getCatalog, getStore } from '@/lib/ami'
+import { currencyFor } from '@/lib/currency-server'
 import { productLookup } from '@/lib/catalog-lookup'
 import { offeredFulfillment, pickupSlots } from '@/lib/store-options'
 import { CheckoutForm } from '@/components/checkout-form'
@@ -14,13 +15,14 @@ export const metadata: Metadata = { title: 'Finalizar compra' }
 export default async function CheckoutPage() {
   const [store, catalog] = await Promise.all([getStore(), getCatalog()])
   const fulfillments = offeredFulfillment(store)
+  const currency = await currencyFor(store)
 
   return (
-    <div className="space-y-5">
-      <Link href="/cart" className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink">
-        <ArrowLeftIcon width={16} height={16} /> Volver al carrito
+    <div className="mx-auto max-w-6xl space-y-6 px-4 pt-6 sm:px-6">
+      <Link href="/cart" className="link-line inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-ink">
+        <ArrowLeftIcon width={14} height={14} /> Volver al carrito
       </Link>
-      <h1 className="text-2xl font-extrabold tracking-tight">Finalizar compra</h1>
+      <h1 className="text-3xl font-medium tracking-tight">Finalizar compra</h1>
 
       {/* Rule 5: a closed store shows its hours and offers no way to pay. */}
       {!store.accepts_orders_now ? (
@@ -34,6 +36,7 @@ export default async function CheckoutPage() {
           pickupSlots={pickupSlots(store)}
           deliveryTerms={store.delivery_terms_text}
           discounts={Boolean(store.modules?.discounts)}
+          currency={currency}
         />
       )}
     </div>

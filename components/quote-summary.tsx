@@ -1,3 +1,4 @@
+import type { Currency } from '@/lib/currency'
 import type { Fulfillment, Quote, Refusal } from '@/lib/types'
 import { AlertIcon } from './icons'
 
@@ -6,15 +7,23 @@ import { AlertIcon } from './icons'
 
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className={`flex items-baseline justify-between gap-4 ${strong ? 'text-base font-bold text-ink' : 'text-sm text-muted'}`}>
+    <div className={`flex items-baseline justify-between gap-4 ${strong ? 'text-base font-semibold text-ink' : 'text-sm text-muted'}`}>
       <dt>{label}</dt>
       <dd className="text-right tabular-nums">{value}</dd>
     </div>
   )
 }
 
-export function QuoteTotals({ quote, fulfillment }: { quote: Quote; fulfillment: Fulfillment }) {
+/** The lines above the total stay in the store's currency — they are the
+ *  figures Ami adds up. With «Bs» chosen and a rate today, the total leads in
+ *  bolívares and the dollars go under it; the other way round otherwise. */
+export function QuoteTotals({ quote, fulfillment, currency = 'USD' }: {
+  quote: Quote
+  fulfillment: Fulfillment
+  currency?: Currency
+}) {
   const delivery = quote.delivery ?? {}
+  const ves = quote.total_ves?.amount_text
   return (
     <dl className="space-y-2">
       <Row label="Subtotal" value={quote.subtotal_text} />
@@ -33,13 +42,20 @@ export function QuoteTotals({ quote, fulfillment }: { quote: Quote; fulfillment:
       )}
       {quote.igtf_text ? <Row label="IGTF" value={quote.igtf_text} /> : null}
       <div className="border-t border-line pt-2">
-        <Row label="Total" value={quote.total_text} strong />
-        {quote.total_ves?.amount_text ? (
-          <p className="text-right text-xs text-muted tabular-nums">{quote.total_ves.amount_text}</p>
-        ) : null}
+        {currency === 'VES' && ves ? (
+          <>
+            <Row label="Total" value={ves} strong />
+            <p className="text-right text-xs text-muted tabular-nums">{quote.total_text}</p>
+          </>
+        ) : (
+          <>
+            <Row label="Total" value={quote.total_text} strong />
+            {ves ? <p className="text-right text-xs text-muted tabular-nums">{ves}</p> : null}
+          </>
+        )}
       </div>
       {quote.free_delivery_missing_text ? (
-        <p className="rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{quote.free_delivery_missing_text}</p>
+        <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">{quote.free_delivery_missing_text}</p>
       ) : null}
     </dl>
   )
@@ -51,7 +67,7 @@ export function Refusals({ refusals }: { refusals: Refusal[] }) {
   return (
     <ul role="alert" className="space-y-2">
       {refusals.map((r, i) => (
-        <li key={`${r.code}-${i}`} className="flex items-start gap-2 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-800">
+        <li key={`${r.code}-${i}`} className="flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
           <AlertIcon width={18} height={18} className="mt-0.5 shrink-0" />
           {r.message}
         </li>

@@ -18,8 +18,8 @@ export default async function MyOrdersPage() {
     .filter((o): o is Order => o !== null)
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-extrabold tracking-tight">Mis pedidos</h1>
+    <div className="mx-auto max-w-2xl space-y-6 px-4 pt-10">
+      <h1 className="text-3xl font-medium tracking-tight">Mis pedidos</h1>
       {orders.length === 0 ? (
         <p className="card p-6 text-center text-muted">
           Todavía no has hecho pedidos desde este navegador.

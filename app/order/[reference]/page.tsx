@@ -21,8 +21,8 @@ export default async function OrderPage({ params }: Props) {
   const reference = (await params).reference.toUpperCase()
   if (!(await rememberedOrders()).includes(reference)) {
     return (
-      <div className="mx-auto max-w-xl space-y-4 py-10 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">Este pedido se hizo desde otro navegador</h1>
+      <div className="mx-auto max-w-xl space-y-4 px-4 py-10 text-center">
+        <h1 className="text-3xl font-medium tracking-tight">Este pedido se hizo desde otro navegador</h1>
         <p className="text-muted">Ábrelo desde el teléfono o la computadora con la que compraste.</p>
         <Link href="/" className="btn-primary">Volver a la tienda</Link>
       </div>
@@ -32,8 +32,8 @@ export default async function OrderPage({ params }: Props) {
   if (!order) notFound()
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
-      <h1 className="text-2xl font-extrabold tracking-tight">Tu pedido</h1>
+    <div className="mx-auto max-w-2xl space-y-5 px-4 pt-10">
+      <h1 className="text-3xl font-medium tracking-tight">Tu pedido</h1>
       <OrderDetails order={order} />
     </div>
   )

@@ -15,7 +15,7 @@ function lineTotal(line: OrderLine) {
 function Row({ label, value, strong }: { label: string; value: string | undefined; strong?: boolean }) {
   if (!value) return null
   return (
-    <div className={`flex items-baseline justify-between gap-4 ${strong ? 'text-base font-bold' : 'text-sm text-muted'}`}>
+    <div className={`flex items-baseline justify-between gap-4 ${strong ? 'text-base font-semibold' : 'text-sm text-muted'}`}>
       <dt>{label}</dt>
       <dd className="text-right tabular-nums">{value}</dd>
     </div>
@@ -46,7 +46,7 @@ export function OrderDetails({ order }: { order: Order }) {
 
       <section className="card space-y-4 p-5" aria-labelledby="detalle">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 id="detalle" className="text-lg font-bold">
+          <h2 id="detalle" className="text-lg font-medium tracking-tight">
             Pedido {order.reference}
           </h2>
           {!order.livemode && <span className="rounded-full bg-ink px-2.5 py-0.5 text-xs font-medium text-white">Prueba</span>}

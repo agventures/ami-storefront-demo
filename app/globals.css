@@ -1,36 +1,77 @@
 @import 'tailwindcss';
 
 /* `--brand` comes from the store's own colour (GET /store → color), set on
-   <body> by the root layout. Everything else is the demo's palette. */
+   <body> by the root layout; it marks focus and the few accents. The rest is
+   the demo's palette: an editorial one, quiet enough that the photos carry
+   the page. */
 @theme inline {
-  --color-brand: var(--brand, #e11d74);
-  --color-brand-ink: color-mix(in oklab, var(--brand, #e11d74) 70%, black);
-  --color-brand-soft: color-mix(in oklab, var(--brand, #e11d74) 10%, white);
+  --color-brand: var(--brand, #141414);
+  --color-brand-ink: color-mix(in oklab, var(--brand, #141414) 80%, black);
+  --color-brand-soft: color-mix(in oklab, var(--brand, #141414) 8%, white);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
 }
 
 @theme {
-  --font-sans: ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  --color-ink: #20172e;
-  --color-muted: #6b6178;
-  --color-paper: #fffaf5;
-  --color-line: #efe6dc;
+  --color-ink: #141414;
+  --color-muted: #6e6b66;
+  --color-paper: #f6f5f2;
+  --color-shade: #ecebe8;
+  --color-line: #e2e0db;
+  /* Motion. Enters and hovers use `--ease-out-soft`: a fast start reads as
+     the page answering. Exits are quicker and use `--ease-in-soft`. */
+  --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-soft: cubic-bezier(0.4, 0, 1, 1);
+
+  /* One-shots: an entrance that always runs to the end. Toggles use
+     transitions instead, so a reversal mid-way picks up where it is. */
+  --animate-rise: rise 640ms var(--ease-out-quint) both;
+  --animate-fade-in: fade-in 180ms var(--ease-out-soft) both;
+  --animate-bump: bump 320ms var(--ease-out-soft);
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+  /* The hero's photo arriving: a slow settle into place, the one long
+     motion on the site, played once on a page people land on. */
+  @keyframes settle {
+    from {
+      opacity: 0;
+      transform: scale(1.04);
+    }
+  }
+  @keyframes bump {
+    40% {
+      transform: scale(1.18);
+    }
+  }
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-padding-top: 8rem;
+    scroll-padding-top: 6rem;
   }
 
   body {
     background: var(--color-paper);
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'ss01', 'cv11';
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
 
@@ -39,35 +80,39 @@
       scroll-behavior: smooth;
     }
   }
-}
 
-@layer components {
-  /* Confetti for the header: a few soft dots, no image request. */
-  .confetti {
-    background-image:
-      radial-gradient(circle at 8% 30%, color-mix(in oklab, var(--color-brand) 35%, transparent) 0 3px, transparent 4px),
-      radial-gradient(circle at 22% 75%, #fbbf24 0 2.5px, transparent 3.5px),
-      radial-gradient(circle at 41% 20%, #38bdf8 0 2px, transparent 3px),
-      radial-gradient(circle at 63% 70%, color-mix(in oklab, var(--color-brand) 35%, transparent) 0 2.5px, transparent 3.5px),
-      radial-gradient(circle at 79% 25%, #a78bfa 0 3px, transparent 4px),
-      radial-gradient(circle at 93% 65%, #34d399 0 2px, transparent 3px);
+  /* Reduced motion means none: no slides, no zooms, no fades either. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
+/* Press feedback on `scale`, a transition rather than a keyframe, so letting
+   go half-way springs back from where it got to. */
 @utility btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold transition-[background-color,transform,opacity] duration-150 ease-out select-none active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-medium transition-[background-color,color,scale,opacity] duration-150 ease-(--ease-out-soft) select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-40 disabled:active:scale-100;
+}
+
+@utility pressable {
+  @apply transition-[scale] duration-150 ease-(--ease-out-soft) active:scale-[0.96];
 }
 
 @utility btn-primary {
-  @apply btn bg-brand text-white shadow-sm hover:bg-brand-ink;
+  @apply btn bg-ink text-paper hover:bg-ink/85;
 }
 
 @utility btn-secondary {
-  @apply btn border border-line bg-white text-ink hover:bg-brand-soft;
+  @apply btn border border-ink/15 bg-transparent text-ink hover:border-ink/40;
 }
 
 @utility field {
-  @apply block w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none;
+  @apply block w-full rounded-xl border border-line bg-white px-3.5 py-3 text-base text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none;
 }
 
 @utility label {
@@ -75,5 +120,35 @@
 }
 
 @utility card {
-  @apply rounded-3xl border border-line bg-white;
+  @apply rounded-2xl border border-line bg-white;
+}
+
+/* A small label above a heading: «Nueva temporada», «Calzado». */
+@utility eyebrow {
+  @apply text-[11px] font-medium tracking-[0.18em] text-muted uppercase;
+}
+
+/* Links that underline from the left on hover: a line scaled on X, which
+   the compositor draws, rather than a background that repaints. Leaving
+   is quicker than arriving and runs off to the right. */
+@utility link-line {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: -1px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 160ms var(--ease-in-soft);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    &:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
+      transition: transform 240ms var(--ease-out-soft);
+    }
+  }
 }

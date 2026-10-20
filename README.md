@@ -2,10 +2,9 @@
 
 Una tienda en línea completa —catálogo, carrito, checkout, pago y seguimiento
 del pedido— hecha con Next.js, que vende a través de la
-[API de tiendas de Ami](https://docs.amiagente.com). Está pensada para una
-tienda de artículos de fiesta, pero muestra lo que tenga la tienda de la llave
-que uses: sus productos, presentaciones, opciones, horarios y formas de
-entrega.
+[API de tiendas de Ami](https://docs.amiagente.com). Está vestida para una
+tienda de ropa, pero muestra lo que tenga la tienda de la llave que uses: sus
+productos, tallas y presentaciones, opciones, horarios y formas de entrega.
 
 La idea que la sostiene: **tu sitio muestra; Ami decide.** Los precios, el
 inventario, el envío, los impuestos, el IGTF, el descuento y los bolívares los
@@ -17,8 +16,8 @@ bancarios.
 
 | Ruta | Qué hace |
 | --- | --- |
-| `/` | La tienda: nombre, logo y horario (`GET /store`, sin caché), aviso de «Cerrado» y el catálogo por categorías (`GET /catalog`, con caché de 5 minutos que el webhook invalida). |
-| `/product/[id]` | El producto: fotos y videos, descripción, presentaciones, opciones con sus mínimos y máximos, cantidad y nota. |
+| `/` | La tienda: nombre, logo y horario (`GET /store`, sin caché), aviso de «Cerrado», lo nuevo y el catálogo por categorías (`GET /catalog`, con caché de 5 minutos que el webhook invalida). |
+| `/product/[id]` | El producto: fotos y videos, descripción, tallas o presentaciones, opciones con sus mínimos y máximos, cantidad y nota. |
 | `/cart` | El carrito (solo las líneas, en `localStorage`), cotizado con `POST /quote` cada vez que cambia; muestra los totales y los motivos de rechazo tal como los escribe Ami, y el código de descuento si la tienda lo usa. |
 | `/checkout` | Datos del cliente (nombre, teléfono y cédula obligatorios), retiro con horario o delivery con «Usar mi ubicación», y `POST /orders` con `Idempotency-Key`. Al crearse el pedido, el cliente va a `payment_url`. |
 | `/order/[reference]` | La página a la que vuelve el cliente después de pagar (`return_url` es `SITE_URL/order/{reference}`): lee el pedido en Ami (`GET /orders/{reference}`) y se actualiza sola mientras espera el pago o la aprobación. Solo muestra pedidos hechos desde este navegador. |
@@ -28,6 +27,23 @@ bancarios.
 
 Toda llamada a Ami sale del servidor, desde `lib/ami.ts`, el único archivo que
 lee `AMI_API_KEY`.
+
+### Dólares o bolívares
+
+Si la tienda vende en dólares y tiene tasa, la cabecera muestra un selector de
+moneda (**USD · $** o **VES · Bs**).
+Ami escribe cada precio en las dos monedas (`price_text` y `price_ves_text`, a
+la tasa de `exchange` en `GET /store`) y el total del carrito también
+(`total_ves`): el selector solo elige qué texto mostrar y guarda la elección
+en una cookie (`moneda`). El sitio no convierte nada, y una tienda sin tasa
+hoy muestra solo dólares. Se cobra lo que Ami cotiza, en la moneda del método
+que el cliente elija al pagar.
+
+### Tus fotos y tus textos
+
+Todo lo que se ve sale de la API, menos la campaña de la portada: el titular,
+las dos historias y el bloque del taller están en `lib/look.ts`, y sus fotos
+en `public/campaign/`. Cámbialos por los de tu tienda.
 
 ## Requisitos
 

@@ -1,12 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import Link from 'next/link'
+import { Inter } from 'next/font/google'
 import type { CSSProperties, ReactNode } from 'react'
 import { getStore, setupProblem } from '@/lib/ami'
+import { currencyFor } from '@/lib/currency-server'
 import { brandColor } from '@/lib/store-options'
 import type { Store } from '@/lib/types'
 import { SetupNotice, type SetupProblem } from '@/components/notices'
+import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import './globals.css'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
 // Every page reads the store live (open or closed right now), so nothing is
 // rendered at build time and the build never needs the API.
@@ -17,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const store = await getStore()
     return {
       title: { default: store.name, template: `%s · ${store.name}` },
-      description: `Haz tu pedido en ${store.name}.`,
+      description: `Compra en línea en ${store.name}.`,
     }
   } catch {
     return { title: 'Tienda de ejemplo' }
@@ -27,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#fffaf5',
+  themeColor: '#f6f5f2',
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -38,9 +42,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   } catch (error) {
     problem = setupProblem(error)
   }
+  const currency = await currencyFor(store)
 
   return (
-    <html lang="es-VE">
+    <html lang="es-VE" className={inter.variable}>
       <body
         className="min-h-dvh font-sans"
         style={{ '--brand': brandColor(store?.color) } as CSSProperties}
@@ -51,33 +56,22 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           Saltar al contenido
         </a>
-        <SiteHeader store={store} />
         {store && !store.livemode && (
-          <p className="bg-ink px-4 py-1.5 text-center text-xs font-medium text-white">
+          <p className="bg-ink px-4 py-1.5 text-center text-[11px] tracking-wide text-paper/90">
             Modo de prueba: los pedidos son simulados y no llegan al negocio.
           </p>
         )}
-        <main id="contenido" className="mx-auto w-full max-w-6xl px-4 pt-6 pb-24">
-          {problem ? <SetupNotice problem={problem} /> : children}
+        <SiteHeader store={store} currency={currency} />
+        <main id="contenido" className="pb-24">
+          {problem ? (
+            <div className="mx-auto max-w-3xl px-4 pt-10">
+              <SetupNotice problem={problem} />
+            </div>
+          ) : (
+            children
+          )}
         </main>
-        <footer className="border-t border-line py-8 text-center text-xs text-muted">
-          <p>
-            {store?.name ?? 'Tienda de ejemplo'} · Vende con{' '}
-            <a href="https://amiagente.com" className="underline underline-offset-2 hover:text-ink">
-              Ami
-            </a>
-          </p>
-          <p className="mt-2 flex justify-center gap-4 sm:hidden">
-            {store?.modules?.booking && (
-              <Link href="/appointments" className="underline underline-offset-2">
-                Citas
-              </Link>
-            )}
-            <Link href="/my-orders" className="underline underline-offset-2">
-              Mis pedidos
-            </Link>
-          </p>
-        </footer>
+        <SiteFooter store={store} />
       </body>
     </html>
   )

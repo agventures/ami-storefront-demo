@@ -8,6 +8,7 @@ import { FULFILLMENT_LABEL, type PickupSlot } from '@/lib/store-options'
 import type { Fulfillment, Pin, Refusal } from '@/lib/types'
 import { cartActions, useCart } from './cart-store'
 import { CheckIcon, PinIcon, SparkleIcon } from './icons'
+import type { Currency } from '@/lib/currency'
 import { QuoteTotals, Refusals, globalRefusals } from './quote-summary'
 import { useQuote } from './use-quote'
 
@@ -26,12 +27,14 @@ export function CheckoutForm({
   pickupSlots,
   deliveryTerms,
   discounts,
+  currency,
 }: {
   lookup: ProductLookup
   fulfillments: Fulfillment[]
   pickupSlots: PickupSlot[]
   deliveryTerms: string
   discounts: boolean
+  currency: Currency
 }) {
   const { lines, code, hydrated } = useCart()
 
@@ -146,7 +149,7 @@ export function CheckoutForm({
     <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
       <div className="space-y-6">
         <section className="card space-y-4 p-5" aria-labelledby="datos">
-          <h2 id="datos" className="text-lg font-bold">
+          <h2 id="datos" className="text-lg font-medium tracking-tight">
             Tus datos
           </h2>
           <div>
@@ -206,7 +209,7 @@ export function CheckoutForm({
         </section>
 
         <section className="card space-y-4 p-5" aria-labelledby="entrega">
-          <h2 id="entrega" className="text-lg font-bold">
+          <h2 id="entrega" className="text-lg font-medium tracking-tight">
             Entrega
           </h2>
           {fulfillments.length > 1 && (
@@ -312,7 +315,7 @@ export function CheckoutForm({
       </div>
 
       <aside className="card space-y-4 p-5 lg:sticky lg:top-20" aria-labelledby="resumen" aria-busy={loading}>
-        <h2 id="resumen" className="text-lg font-bold">
+        <h2 id="resumen" className="text-lg font-medium tracking-tight">
           Tu pedido
         </h2>
         <ul className="space-y-2 text-sm">
@@ -337,7 +340,7 @@ export function CheckoutForm({
         <div className="border-t border-line pt-4">
           {quote ? (
             <div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
-              <QuoteTotals quote={quote} fulfillment={fulfillment} />
+              <QuoteTotals quote={quote} fulfillment={fulfillment} currency={currency} />
             </div>
           ) : (
             <div className="h-24 animate-pulse rounded-xl bg-brand-soft" aria-label="Calculando el total" />

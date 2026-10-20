@@ -1,22 +1,26 @@
 import Link from 'next/link'
+import { type Currency, compareAtIn, priceIn } from '@/lib/currency'
 import type { Product } from '@/lib/types'
-import { BalloonIcon } from './icons'
 
 /** «desde» is written only when Ami says the price varies, and the price
- *  before an offer only when Ami sends one — struck through, after it. */
-export function PriceText({ product, className }: {
-  product: Pick<Product, 'price_text' | 'price_from' | 'compare_at_text'>
+ *  before an offer only when Ami sends one — struck through, after it. Both
+ *  in the currency the customer chose, in the text Ami wrote for it. */
+export function PriceText({ product, currency, className }: {
+  product: Pick<Product, 'price_text' | 'price_ves_text' | 'price_from' | 'compare_at_text' | 'compare_at_ves_text'>
+  currency: Currency
   className?: string
 }) {
-  if (!product.price_text) return null
+  const price = priceIn(product, currency)
+  if (!price) return null
+  const before = compareAtIn(product, currency)
   return (
     <span className={className}>
-      {product.price_from ? <span className="font-normal text-muted">desde </span> : null}
-      {product.price_text}
-      {product.compare_at_text ? (
-        <s className="ml-2 text-sm font-normal text-muted">
+      {product.price_from ? <span className="text-muted">desde </span> : null}
+      {price}
+      {before ? (
+        <s className="ml-2 text-muted">
           <span className="sr-only">antes </span>
-          {product.compare_at_text}
+          {before}
         </s>
       ) : null}
     </span>
@@ -33,41 +37,49 @@ export function stockLabel(item: Pick<Product, 'sold_out' | 'backorder' | 'stock
   return null
 }
 
-export function ProductCard({ product, bookable }: { product: Product; bookable: boolean }) {
+/** The sizes a product comes in, as the store named them: «S · M · L». */
+function sizesOf(product: Product): string | null {
+  const names = product.variants.filter((v) => !v.sold_out).map((v) => v.name.replace(/^Talla\s+/i, ''))
+  return names.length > 1 ? names.join(' · ') : null
+}
+
+export function ProductCard({ product, bookable, currency }: { product: Product; bookable: boolean; currency: Currency }) {
   // Images are plain <img>: their host belongs to the store and is not known
   // at build time, which next/image's remotePatterns would need.
-  const image = product.image_url ?? product.media.find((m) => m.kind === 'image')?.thumb_url ?? null
+  const image = product.image_full_url ?? product.image_url ?? product.media.find((m) => m.kind === 'image')?.url ?? null
+  const badge = product.sold_out ? 'Agotado' : (stockLabel(product) ?? (bookable ? 'Con cita' : null))
+  const sizes = sizesOf(product)
   return (
-    <Link
-      href={`/product/${encodeURIComponent(product.id)}`}
-      className="group flex flex-col overflow-hidden rounded-3xl border border-line bg-white transition-shadow hover:shadow-md"
-    >
-      <div className="relative aspect-square overflow-hidden bg-brand-soft">
+    <Link href={`/product/${encodeURIComponent(product.id)}`} className="group block">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-xl bg-shade">
         {image ? (
           <img
             src={image}
             alt=""
             loading="lazy"
             decoding="async"
-            className={`size-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03] ${product.sold_out ? 'opacity-60 grayscale' : ''}`}
+            className={`size-full object-cover transition-transform duration-[400ms] ease-(--ease-out-soft) group-hover:scale-[1.03] ${product.sold_out ? 'opacity-50 grayscale' : ''}`}
           />
         ) : (
-          <div className="flex size-full items-center justify-center text-brand/40">
-            <BalloonIcon width={40} height={40} />
-          </div>
+          <div className="flex size-full items-center justify-center text-xs text-muted">Sin foto</div>
         )}
-        {product.sold_out ? (
-          <span className="absolute top-2 left-2 rounded-full bg-ink/85 px-2.5 py-1 text-xs font-semibold text-white">Agotado</span>
-        ) : stockLabel(product) ? (
-          <span className="absolute top-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink">{stockLabel(product)}</span>
-        ) : bookable ? (
-          <span className="absolute top-2 left-2 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-ink">Con cita</span>
+        {badge ? (
+          <span className="absolute top-3 left-3 rounded-full bg-paper/90 px-2.5 py-1 text-[11px] font-medium backdrop-blur">
+            {badge}
+          </span>
+        ) : null}
+        {sizes ? (
+          <span className="absolute inset-x-3 bottom-3 translate-y-2 rounded-full bg-paper/90 px-3 py-1.5 text-center text-[11px] text-ink/80 opacity-0 backdrop-blur transition-[opacity,transform] duration-200 ease-(--ease-out-soft) group-hover:translate-y-0 group-hover:opacity-100">
+            {sizes}
+          </span>
         ) : null}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
-        {product.brand ? <p className="text-xs text-muted">{product.brand}</p> : null}
-        <h3 className="line-clamp-2 text-sm leading-snug font-semibold sm:text-base">{product.name}</h3>
-        <PriceText product={product} className="mt-auto text-sm font-bold text-brand-ink sm:text-base" />
+      <div className="mt-3 flex items-start justify-between gap-3 text-sm">
+        <div className="min-w-0">
+          <h3 className="truncate font-medium">{product.name}</h3>
+          <p className="truncate text-xs text-muted">{product.brand || product.category}</p>
+        </div>
+        <PriceText product={product} currency={currency} className="shrink-0 text-right tabular-nums" />
       </div>
     </Link>
   )

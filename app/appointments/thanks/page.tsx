@@ -19,8 +19,8 @@ export default async function AppointmentThanksPage() {
 
   if (!appointment) {
     return (
-      <div className="mx-auto max-w-xl space-y-4 py-10 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">No encontramos tu cita en este navegador</h1>
+      <div className="mx-auto max-w-xl space-y-4 px-4 py-10 text-center">
+        <h1 className="text-3xl font-medium tracking-tight">No encontramos tu cita en este navegador</h1>
         <Link href="/appointments" className="btn-primary">
           Agendar una cita
         </Link>
@@ -31,9 +31,9 @@ export default async function AppointmentThanksPage() {
   const moving = appointment.status === 'awaiting_payment' || appointment.status === 'pending_approval'
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
+    <div className="mx-auto max-w-2xl space-y-5 px-4 pt-10">
       <AutoRefresh active={moving} />
-      <h1 className="text-2xl font-extrabold tracking-tight">Tu cita</h1>
+      <h1 className="text-3xl font-medium tracking-tight">Tu cita</h1>
       <StatusCard copy={appointmentStatusCopy(appointment.status)}>
         <p className="font-medium">{appointment.when_text}</p>
         {appointment.total_text && <p className="text-sm text-muted">Total: {appointment.total_text}</p>}

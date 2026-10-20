@@ -50,6 +50,12 @@ export const ArrowLeftIcon = (props: IconProps) => (
   </Icon>
 )
 
+export const ChevronDownIcon = (props: IconProps) => (
+  <Icon {...props}>
+    <path d="m6 9 6 6 6-6" />
+  </Icon>
+)
+
 export const MinusIcon = (props: IconProps) => (
   <Icon {...props}>
     <path d="M5 12h14" />

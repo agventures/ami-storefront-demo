@@ -8,8 +8,8 @@ export default function ErrorPage({ error, reset }: { error: Error & { digest?: 
   }, [error])
 
   return (
-    <div className="mx-auto max-w-xl space-y-4 py-16 text-center">
-      <h1 className="text-2xl font-extrabold tracking-tight">Algo salió mal</h1>
+    <div className="mx-auto max-w-xl space-y-4 px-4 py-16 text-center">
+      <h1 className="text-3xl font-medium tracking-tight">Algo salió mal</h1>
       <p className="text-muted">No pudimos cargar esta parte de la tienda. Intenta de nuevo en un momento.</p>
       <button type="button" onClick={reset} className="btn-primary">
         Reintentar

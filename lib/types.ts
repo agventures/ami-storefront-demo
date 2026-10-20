@@ -11,6 +11,23 @@ export type Fulfillment = 'pickup' | 'delivery' | 'shipping'
 
 // ---------------------------------------------------------------- store
 
+/** The rate a dollar store crosses to bolívares at: the one every
+ *  `price_ves_text` and the quote's `total_ves` were written with. */
+export type Exchange = {
+  rate: string
+  rate_text: string
+  source: string
+  as_of: string | null
+}
+
+/** One day of the week as the store writes it: «Lunes», «10:00 AM – 7:00 PM». */
+export type WeekDay = {
+  day: string
+  today: boolean
+  /** Empty on a day it does not open. */
+  hours: string[]
+}
+
 export type Store = {
   object: 'store'
   livemode: boolean
@@ -20,11 +37,17 @@ export type Store = {
   color: string | null
   open: boolean
   hours_text: string
+  week?: WeekDay[]
   accepts_orders_now: boolean
   fulfillment: Partial<Record<Fulfillment, unknown>> & Record<string, unknown>
   delivery_terms_text: string
   min_order: string
   min_order_text: string
+  /** Null for a store that sells in bolívares, or with no rate today. */
+  exchange?: Exchange | null
+  address?: string | null
+  contact_phone?: string | null
+  whatsapp?: string | null
   // The spec types the items as `{}`; `pickup_at` takes "one of them".
   pickup_slots: unknown[]
   modules: {
@@ -63,8 +86,11 @@ export type Variant = {
   sku?: string | null
   price: string
   price_text: string
+  /** The same price in bolívares, written by Ami; null with no rate. */
+  price_ves_text?: string | null
   /** The price before an offer, to strike through; null when none. */
   compare_at_text?: string | null
+  compare_at_ves_text?: string | null
   sold_out: boolean
   /** None now, but it can be ordered: «Por encargo». */
   backorder?: boolean
@@ -111,8 +137,10 @@ export type Product = {
   sku?: string | null
   price: string | null
   price_text: string
+  price_ves_text?: string | null
   price_from: boolean
   compare_at_text?: string | null
+  compare_at_ves_text?: string | null
   sold_out: boolean
   backorder?: boolean
   stock_left?: number | null

@@ -126,7 +126,7 @@ export function BookingFlow({ menu, initialService }: { menu: BookingMenu; initi
   return (
     <form onSubmit={submit} className="space-y-6">
       <section className="card space-y-3 p-5" aria-labelledby="servicio">
-        <h2 id="servicio" className="text-lg font-bold">
+        <h2 id="servicio" className="text-lg font-medium tracking-tight">
           1. Elige el servicio
         </h2>
         <fieldset>
@@ -178,7 +178,7 @@ export function BookingFlow({ menu, initialService }: { menu: BookingMenu; initi
 
       {serviceId && (
         <section className="card space-y-4 p-5" aria-labelledby="hora" aria-busy={loadingSlots}>
-          <h2 id="hora" className="text-lg font-bold">
+          <h2 id="hora" className="text-lg font-medium tracking-tight">
             2. Elige el día y la hora
           </h2>
           {loadingSlots ? (
@@ -229,7 +229,7 @@ export function BookingFlow({ menu, initialService }: { menu: BookingMenu; initi
 
       {slot && (
         <section className="card space-y-4 p-5" aria-labelledby="tus-datos">
-          <h2 id="tus-datos" className="text-lg font-bold">
+          <h2 id="tus-datos" className="text-lg font-medium tracking-tight">
             3. Tus datos
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">

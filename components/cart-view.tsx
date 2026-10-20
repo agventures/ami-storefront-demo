@@ -5,8 +5,9 @@ import { useState } from 'react'
 import { type ProductLookup, lineDetails } from '@/lib/catalog-lookup'
 import type { Fulfillment, QuoteLine, Refusal } from '@/lib/types'
 import { cartActions, useCart } from './cart-store'
-import { SparkleIcon, TrashIcon } from './icons'
+import { BagIcon, TrashIcon } from './icons'
 import { QuantityStepper } from './quantity-stepper'
+import type { Currency } from '@/lib/currency'
 import { QuoteTotals, Refusals, globalRefusals } from './quote-summary'
 import { useQuote } from './use-quote'
 
@@ -20,12 +21,14 @@ export function CartView({
   acceptsOrders,
   discounts,
   minOrderText,
+  currency,
 }: {
   lookup: ProductLookup
   fulfillment: Fulfillment | null
   acceptsOrders: boolean
   discounts: boolean
   minOrderText: string
+  currency: Currency
 }) {
   const { lines, code, hydrated } = useCart()
   const { quote, error, loading, fresh } = useQuote(
@@ -39,7 +42,7 @@ export function CartView({
   if (!lines.length) {
     return (
       <div className="card flex flex-col items-center gap-4 px-6 py-14 text-center">
-        <SparkleIcon width={40} height={40} className="text-brand" />
+        <BagIcon width={36} height={36} className="text-muted" />
         <p className="text-lg font-semibold">Tu carrito está vacío</p>
         <Link href="/" className="btn-primary">
           Ver productos
@@ -68,13 +71,13 @@ export function CartView({
       </ul>
 
       <aside className="card space-y-4 p-5 lg:sticky lg:top-20" aria-label="Resumen" aria-busy={loading}>
-        <h2 className="text-lg font-bold">Resumen</h2>
+        <h2 className="text-lg font-medium tracking-tight">Resumen</h2>
 
         {discounts && <DiscountCode code={code} />}
 
         {quote ? (
           <div className={loading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
-            <QuoteTotals quote={quote} fulfillment={fulfillment ?? 'pickup'} />
+            <QuoteTotals quote={quote} fulfillment={fulfillment ?? 'pickup'} currency={currency} />
           </div>
         ) : fulfillment ? (
           <div className="h-24 animate-pulse rounded-xl bg-brand-soft" aria-label="Calculando el total" />
@@ -130,7 +133,7 @@ function CartLineRow({
 
   return (
     <li className="flex gap-3 p-4 sm:gap-4">
-      <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-brand-soft">
+      <div className="h-24 w-18 shrink-0 overflow-hidden rounded-lg bg-shade">
         {product?.image ? <img src={product.image} alt="" className="size-full object-cover" /> : null}
       </div>
       <div className="min-w-0 flex-1 space-y-2">

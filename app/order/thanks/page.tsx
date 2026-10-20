@@ -16,8 +16,8 @@ export default async function ThanksPage() {
 
   if (!order) {
     return (
-      <div className="mx-auto max-w-xl space-y-4 py-10 text-center">
-        <h1 className="text-2xl font-extrabold tracking-tight">No encontramos tu pedido en este navegador</h1>
+      <div className="mx-auto max-w-xl space-y-4 px-4 py-10 text-center">
+        <h1 className="text-3xl font-medium tracking-tight">No encontramos tu pedido en este navegador</h1>
         <p className="text-muted">Si ya pagaste, puedes buscarlo con tu número de teléfono.</p>
         <Link href="/my-orders" className="btn-primary">
           Buscar mis pedidos
@@ -27,8 +27,8 @@ export default async function ThanksPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-5">
-      <h1 className="text-2xl font-extrabold tracking-tight">¡Gracias por tu pedido!</h1>
+    <div className="mx-auto max-w-2xl space-y-5 px-4 pt-10">
+      <h1 className="text-3xl font-medium tracking-tight">¡Gracias por tu pedido!</h1>
       <OrderDetails order={order} />
     </div>
   )

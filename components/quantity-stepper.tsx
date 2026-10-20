@@ -18,8 +18,8 @@ export function QuantityStepper({
 }) {
   const button =
     size === 'sm'
-      ? 'size-8 rounded-full hover:bg-brand-soft disabled:opacity-40'
-      : 'size-11 rounded-full hover:bg-brand-soft disabled:opacity-40'
+      ? 'pressable size-8 rounded-full transition-[background-color,scale] hover:bg-shade disabled:opacity-40 disabled:active:scale-100'
+      : 'pressable size-11 rounded-full transition-[background-color,scale] hover:bg-shade disabled:opacity-40 disabled:active:scale-100'
   return (
     <div role="group" aria-label={label} className="inline-flex items-center rounded-full border border-line bg-white">
       <button

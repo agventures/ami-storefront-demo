@@ -18,9 +18,9 @@ export default async function BookingPage({ searchParams }: Props) {
   const service = Array.isArray(params.service) ? params.service[0] : params.service
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="mx-auto max-w-3xl space-y-5 px-4 pt-10">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight">Agendar una cita</h1>
+        <h1 className="text-3xl font-medium tracking-tight">Agendar una cita</h1>
         <p className="mt-1 text-muted">Elige el servicio, el día y la hora que te queden mejor.</p>
       </div>
       {menu.services.length === 0 ? (

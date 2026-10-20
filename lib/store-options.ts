@@ -45,5 +45,5 @@ export const FULFILLMENT_LABEL: Record<Fulfillment, string> = {
 
 /** A safe CSS colour from `store.color`, or the demo's own. */
 export function brandColor(color: string | null | undefined) {
-  return color && /^#[0-9a-f]{3,8}$/i.test(color) ? color : '#e11d74'
+  return color && /^#[0-9a-f]{3,8}$/i.test(color) ? color : '#141414'
 }
