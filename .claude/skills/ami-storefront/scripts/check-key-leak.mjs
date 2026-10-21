@@ -9,7 +9,9 @@
 // - the key is exposed through a browser-visible env prefix
 //   (NEXT_PUBLIC_, VITE_, PUBLIC_, REACT_APP_, NUXT_PUBLIC_, EXPO_PUBLIC_);
 // - AMI_API_KEY is read in a client component, a file that runs in the
-//   browser.
+//   browser;
+// - a customer's token from «Entrar con Ami» (ami_cs_…) is written into a
+//   file, or a client component sends Ami-Customer-Token itself.
 //
 // The skill's own folder is left out wherever it is installed: its notes
 // and this file name the key on purpose.
@@ -23,6 +25,7 @@ const SELF = realpathSync(fileURLToPath(new URL('..', import.meta.url)))
 const BUILT = ['.next/static', 'out', 'dist', 'build', '.output/public']
 const TEXT = /\.(m?[jt]sx?|json|html|css|env|ya?ml|md|vue|svelte|astro)$|^\.env/
 const SECRET = /\bami_(live|test)_[A-Za-z0-9_-]{24,}/
+const CUSTOMER_TOKEN = /\bami_cs_[A-Za-z0-9_-]{24,}/
 const PUBLIC_PREFIX = /\b(NEXT_PUBLIC|VITE|PUBLIC|REACT_APP|NUXT_PUBLIC|EXPO_PUBLIC)_[A-Z0-9_]*AMI[A-Z0-9_]*KEY\b/
 
 const problems = []
@@ -54,6 +57,12 @@ function walk(dir, { built = false } = {}) {
     }
     if (!built && /['"]use client['"]/.test(text) && /AMI_API_KEY/.test(text)) {
       problems.push(`${where}: lee AMI_API_KEY en un componente de cliente`)
+    }
+    if (CUSTOMER_TOKEN.test(text)) {
+      problems.push(`${where}: contiene el token de un cliente de Ami escrito en el archivo`)
+    }
+    if (!built && /['"]use client['"]/.test(text) && /Ami-Customer-Token/i.test(text)) {
+      problems.push(`${where}: envía Ami-Customer-Token desde un componente de cliente`)
     }
   }
 }

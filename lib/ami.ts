@@ -9,11 +9,15 @@ import type {
   Catalog,
   CartRequest,
   Customer,
+  CustomerAccount,
+  CustomerSession,
   Order,
   OrderList,
   OrderRequest,
+  Policy,
   Product,
   Quote,
+  SignIn,
   Store,
 } from './types'
 
@@ -41,9 +45,14 @@ const GENERIC_MESSAGE = 'No pudimos comunicarnos con la tienda. Intenta de nuevo
 type AmiInit = Omit<RequestInit, 'body'> & {
   body?: unknown
   idempotencyKey?: string
+  /** The signed-in customer's token (`ami_cs_…`), sent as Ami-Customer-Token. */
+  customerToken?: string | null
 }
 
-async function ami<T>(path: string, { body, idempotencyKey, headers, ...init }: AmiInit = {}): Promise<T> {
+async function ami<T>(
+  path: string,
+  { body, idempotencyKey, customerToken, headers, ...init }: AmiInit = {},
+): Promise<T> {
   const key = process.env.AMI_API_KEY
   if (!key) {
     throw new AmiError(0, 'missing_api_key', 'AMI_API_KEY is not set in the server environment', null)
@@ -58,6 +67,7 @@ async function ami<T>(path: string, { body, idempotencyKey, headers, ...init }: 
         Accept: 'application/json',
         ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
+        ...(customerToken ? { 'Ami-Customer-Token': customerToken } : {}),
         ...(headers as Record<string, string> | undefined),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -120,8 +130,8 @@ export const getProduct = cache(async (id: string): Promise<Product | null> => {
 
 export const quote = (cart: CartRequest) => ami<Quote>('/quote', { method: 'POST', body: cart, cache: 'no-store' })
 
-export const createOrder = (order: OrderRequest, idempotencyKey: string) =>
-  ami<Order>('/orders', { method: 'POST', body: order, idempotencyKey, cache: 'no-store' })
+export const createOrder = (order: OrderRequest, idempotencyKey: string, customerToken?: string | null) =>
+  ami<Order>('/orders', { method: 'POST', body: order, idempotencyKey, customerToken, cache: 'no-store' })
 
 export async function getOrder(reference: string): Promise<Order | null> {
   try {
@@ -137,6 +147,52 @@ export async function getOrder(reference: string): Promise<Order | null> {
 // orders. Use it only once the customer proved the phone is theirs.
 export const listOrders = (phone: string) =>
   ami<OrderList>(`/orders?phone=${encodeURIComponent(phone)}&limit=20`, { cache: 'no-store' })
+
+// ---------------------------------------------------------------- policies
+
+/** One of the shop's policies, by the `key` GET /store lists it under. */
+export async function getPolicy(key: string): Promise<Policy | null> {
+  try {
+    return await ami<Policy>(`/policies/${encodeURIComponent(key)}`, { next: { revalidate: 300 } })
+  } catch (error) {
+    if (isNotFound(error)) return null
+    throw error
+  }
+}
+
+// ------------------------------------------------------------------ accounts
+// «Entrar con Ami». The customer's token is as private as the key: it lives
+// in an httpOnly cookie this server set (lib/customer.ts) and only ever
+// travels from here to Ami.
+
+export const startSignIn = (redirectUri: string) =>
+  ami<SignIn>('/customer/sign-in', { method: 'POST', body: { redirect_uri: redirectUri }, cache: 'no-store' })
+
+export const redeemSignIn = (code: string, verifier: string) =>
+  ami<CustomerSession>('/customer/session', { method: 'POST', body: { code, verifier }, cache: 'no-store' })
+
+export const getAccount = (customerToken: string) =>
+  ami<CustomerAccount>('/customer', { customerToken, cache: 'no-store' })
+
+export const getAccountOrders = (customerToken: string) =>
+  ami<OrderList>('/customer/orders?limit=20', { customerToken, cache: 'no-store' })
+
+/** One of the account's orders at this shop, or null — including for an
+ *  order that is somebody else's, or a token Ami no longer takes. */
+export async function getAccountOrder(customerToken: string, reference: string): Promise<Order | null> {
+  try {
+    return await ami<Order>(`/customer/orders/${encodeURIComponent(reference)}`, {
+      customerToken,
+      cache: 'no-store',
+    })
+  } catch (error) {
+    if (isNotFound(error) || (error instanceof AmiError && error.status === 401)) return null
+    throw error
+  }
+}
+
+export const signOutAccount = (customerToken: string) =>
+  ami<{ revoked: boolean }>('/customer/session', { method: 'DELETE', customerToken, cache: 'no-store' })
 
 // ------------------------------------------------------------------ booking
 

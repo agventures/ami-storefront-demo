@@ -58,7 +58,14 @@ export type Store = {
     [key: string]: unknown
   }
   shipping?: unknown
+  /** The policies the shop wrote (Ajustes › Políticas), for the footer's
+   *  links; their text is GET /policies/{key}. */
+  policies?: PolicyRef[]
 }
+
+export type PolicyRef = { key: string; title: string }
+
+export type Policy = PolicyRef & { object: 'policy'; body: string }
 
 // ---------------------------------------------------------------- catalog
 
@@ -207,6 +214,10 @@ export type CartRequest = {
 export type OrderRequest = CartRequest & {
   return_url: string
   metadata?: Record<string, string>
+  /** With a signed-in customer: the saved address this delivery goes to, or
+   *  the name to save this one under. */
+  saved_address_id?: string
+  save_address_label?: string
 }
 
 // ---------------------------------------------------------------- quote
@@ -365,3 +376,32 @@ export type Appointment = {
   can_cancel?: boolean
   can_move?: boolean
 }
+
+// --------------------------------------------------------------- accounts
+
+/** «Entrar con Ami»: the account a customer signed in with. */
+export type SavedAddress = {
+  object: 'address'
+  id: string
+  label: string
+  address: string
+  reference_point: string
+  pin: Pin | null
+  is_default: boolean
+  last_used_at: string | null
+}
+
+export type CustomerAccount = {
+  object: 'customer'
+  /** The same every time this customer signs in here; another shop sees another. */
+  id: string
+  email: string
+  name: string
+  phone: string
+  document: string
+  addresses: SavedAddress[]
+}
+
+export type SignIn = { object: 'sign_in'; url: string; verifier: string; expires_at: string }
+
+export type CustomerSession = { object: 'customer_session'; token: string; customer: CustomerAccount }

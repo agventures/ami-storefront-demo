@@ -5,7 +5,7 @@ import { type FormEvent, useRef, useState } from 'react'
 import { placeOrder } from '@/app/actions'
 import { type ProductLookup, lineDetails } from '@/lib/catalog-lookup'
 import { FULFILLMENT_LABEL, type PickupSlot } from '@/lib/store-options'
-import type { Fulfillment, Pin, Refusal } from '@/lib/types'
+import type { CustomerAccount, Fulfillment, Pin, Refusal, SavedAddress } from '@/lib/types'
 import { cartActions, useCart } from './cart-store'
 import { CheckIcon, PinIcon, SparkleIcon } from './icons'
 import type { Currency } from '@/lib/currency'
@@ -28,6 +28,7 @@ export function CheckoutForm({
   deliveryTerms,
   discounts,
   currency,
+  account,
 }: {
   lookup: ProductLookup
   fulfillments: Fulfillment[]
@@ -35,19 +36,36 @@ export function CheckoutForm({
   deliveryTerms: string
   discounts: boolean
   currency: Currency
+  /** «Entrar con Ami»: the signed-in account fills the form, or null. */
+  account: CustomerAccount | null
 }) {
   const { lines, code, hydrated } = useCart()
+  const saved = account?.addresses ?? []
+  const first = saved.find((a) => a.is_default) ?? saved[0] ?? null
 
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [cedula, setCedula] = useState('')
-  const [email, setEmail] = useState('')
+  const [name, setName] = useState(account?.name ?? '')
+  const [phone, setPhone] = useState(account?.phone ?? '')
+  const [cedula, setCedula] = useState(account?.document ?? '')
+  const [email, setEmail] = useState(account?.email ?? '')
   const [note, setNote] = useState('')
   const [fulfillment, setFulfillment] = useState<Fulfillment>(fulfillments[0])
   const [pickupAt, setPickupAt] = useState('ahora')
-  const [pin, setPin] = useState<Pin | null>(null)
-  const [address, setAddress] = useState('')
-  const [referencePoint, setReferencePoint] = useState('')
+  const [pin, setPin] = useState<Pin | null>(first?.pin ?? null)
+  const [address, setAddress] = useState(first?.address ?? '')
+  const [referencePoint, setReferencePoint] = useState(first?.reference_point ?? '')
+  // A saved address the delivery goes to, or '' for a new one — which a
+  // signed-in customer may keep under a name.
+  const [savedAddressId, setSavedAddressId] = useState(first?.id ?? '')
+  const [saveLabel, setSaveLabel] = useState('')
+  const [keepAddress, setKeepAddress] = useState(false)
+
+  function chooseAddress(id: string) {
+    const chosen: SavedAddress | undefined = saved.find((a) => a.id === id)
+    setSavedAddressId(chosen?.id ?? '')
+    setAddress(chosen?.address ?? '')
+    setReferencePoint(chosen?.reference_point ?? '')
+    setPin(chosen?.pin ?? null)
+  }
   const [locating, setLocating] = useState(false)
   const [geoError, setGeoError] = useState<string | null>(null)
 
@@ -109,6 +127,8 @@ export function CheckoutForm({
         attemptId: attempt.current,
         customer: { name, phone, cedula, email },
         note,
+        savedAddressId: savedAddressId || undefined,
+        saveAddressLabel: !savedAddressId && keepAddress ? saveLabel.trim() || 'Mi dirección' : undefined,
       })
       if (result.status === 'created') {
         // The order exists: the cart has done its job.
@@ -152,6 +172,15 @@ export function CheckoutForm({
           <h2 id="datos" className="text-lg font-medium tracking-tight">
             Tus datos
           </h2>
+          {!account && (
+            <p className="text-sm text-muted">
+              ¿Tienes cuenta de Ami?{' '}
+              <a href="/auth/ami?next=/checkout" className="link-line text-ink">
+                Entra
+              </a>{' '}
+              y usa tus datos y tus direcciones guardadas.
+            </p>
+          )}
           <div>
             <label htmlFor="name" className="label">
               Nombre y apellido
@@ -255,6 +284,26 @@ export function CheckoutForm({
 
           {fulfillment === 'delivery' && (
             <div className="space-y-4">
+              {saved.length > 0 && (
+                <div>
+                  <label htmlFor="saved-address" className="label">
+                    Mis direcciones
+                  </label>
+                  <select
+                    id="saved-address"
+                    value={savedAddressId}
+                    onChange={(e) => chooseAddress(e.target.value)}
+                    className="field"
+                  >
+                    {saved.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.label ? `${a.label} · ${a.address}` : a.address || 'Ubicación guardada'}
+                      </option>
+                    ))}
+                    <option value="">Otra dirección</option>
+                  </select>
+                </div>
+              )}
               <div className="space-y-2">
                 <button type="button" onClick={locate} disabled={locating} className="btn-secondary w-full sm:w-auto">
                   <PinIcon width={18} height={18} />
@@ -301,6 +350,29 @@ export function CheckoutForm({
                   className="field"
                 />
               </div>
+              {account && !savedAddressId && (
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={keepAddress}
+                      onChange={(e) => setKeepAddress(e.target.checked)}
+                      className="size-4 accent-(--color-brand)"
+                    />
+                    Guardar esta dirección en mi cuenta
+                  </label>
+                  {keepAddress && (
+                    <input
+                      aria-label="Nombre de la dirección"
+                      maxLength={40}
+                      placeholder="Casa, Trabajo…"
+                      value={saveLabel}
+                      onChange={(e) => setSaveLabel(e.target.value)}
+                      className="field"
+                    />
+                  )}
+                </div>
+              )}
               {deliveryTerms && <p className="text-xs text-muted">{deliveryTerms}</p>}
             </div>
           )}

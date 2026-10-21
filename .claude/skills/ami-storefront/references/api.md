@@ -2,13 +2,14 @@
 
 Base: `https://api.amiagente.com/v1/storefront` · Encabezado: `Authorization: Bearer $AMI_API_KEY` · JSON.
 
-Errores: `{"error": {"code": "...", "message": "..."}}` — `code` en inglés (para tu `if`), `message` en español (para el cliente).
+Errores: `{"error": {"code": "...", "message": "..."}}` — `code` en inglés (para tu `if`), `message` en español (para el cliente). Un `429 rate_limited` trae `Retry-After` (segundos).
 
 ## Tienda y catálogo
 
 | Método | Ruta | Devuelve |
 | --- | --- | --- |
-| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}` |
+| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}`, `policies[] {key, title}` |
+| GET | `/policies` · `/policies/{key}` | Las políticas del negocio (devoluciones, privacidad, términos): `{object: 'policy', key, title, body}`. `body` es texto plano con párrafos separados por líneas en blanco. |
 | GET | `/catalog` | `currency`, `categories[] {id, name, position, parent_id}`, `products[]` (ver abajo). Con `ETag`; `If-None-Match` → `304`. |
 | GET | `/products/{id}` | Un producto, por su `id` o por su código (SKU) |
 | GET | `/payment-methods` | `methods[] {id, label, settles_in, is_cash, spidi}` — solo para mostrar; el pago es en `payment_url` |
@@ -42,12 +43,25 @@ Campos desconocidos → `422 invalid_request`.
 | Método | Ruta | Notas |
 | --- | --- | --- |
 | POST | `/quote` | `ok`, `lines[] {key, name, quantity, unit_price_text, line_total_text, refusal}`, `subtotal_text`, `discount_text`, `delivery {fee_text, pending, journey_text}`, `free_delivery_missing_text`, `taxes[] {label, amount_text}`, `igtf_text`, `total_text`, `total_ves {amount_text}`, `refusals[] {code, message}`. No guarda nada. |
-| POST | `/orders` | + `return_url` (en el sitio del negocio; `localhost` con llave de prueba), `metadata` (≤20 claves). Encabezado `Idempotency-Key`. `201` → pedido con `payment_url`. Rechazo: `422` `order_refused` con `error.quote`. |
+| POST | `/orders` | + `return_url` (en el sitio del negocio; `localhost` con llave de prueba), `metadata` (≤20 claves). Encabezado `Idempotency-Key`. Con `Ami-Customer-Token` (ver `cuentas.md`): queda en la cuenta del cliente, y acepta `saved_address_id` y `save_address_label`. `201` → pedido con `payment_url`. Rechazo: `422` `order_refused` con `error.quote`. |
 | GET | `/orders/{reference}` | El pedido. Solo los que creó tu sitio. |
 | GET | `/orders?phone=` | Pedidos de tu sitio para un teléfono. |
 | GET | `/orders/{reference}/subscriptions` | Suscripciones que compró ese pedido. |
 
 Pedido: `reference`, `status` (`awaiting_payment` → `pending_approval` → `in_progress` → `complete`; o `cancelled`, `returned`, `expired`), `payment_status` (`unpaid`, `sent`, `paid`, `receivable`, `void`), `stage_text`, `lines[]`, `subtotal_text`, `discount_text`, `delivery_text`, `taxes`, `igtf_text`, `total_text`, `fulfillment_text`, `payment_method`, `timeline[]`, `payment_url` (solo en `awaiting_payment`), `payment_expires_at`, `metadata`.
+
+## Clientes («Entrar con Ami», ver `cuentas.md`)
+
+| Método | Ruta | Notas |
+| --- | --- | --- |
+| POST | `/customer/sign-in` | `{redirect_uri}` → `{url, verifier}` |
+| POST | `/customer/session` | `{code, verifier}` → `{token, customer}` |
+| DELETE | `/customer/session` | Cerrar sesión |
+| GET · PATCH | `/customer` | La cuenta: `id`, `email`, `name`, `phone`, `document`, `addresses[]` |
+| GET · POST · PATCH · DELETE | `/customer/addresses[/{id}]` | Sus direcciones |
+| GET | `/customer/orders[/{reference}]` | Sus pedidos en esta tienda |
+
+Todas, menos las dos primeras, con `Ami-Customer-Token: ami_cs_…`.
 
 ## Citas (si `store.modules.booking`)
 

@@ -20,13 +20,17 @@ bancarios.
 | `/product/[id]` | El producto: fotos y videos, descripción, tallas o presentaciones, opciones con sus mínimos y máximos, cantidad y nota. |
 | `/cart` | El carrito (solo las líneas, en `localStorage`), cotizado con `POST /quote` cada vez que cambia; muestra los totales y los motivos de rechazo tal como los escribe Ami, y el código de descuento si la tienda lo usa. |
 | `/checkout` | Datos del cliente (nombre, teléfono y cédula obligatorios), retiro con horario o delivery con «Usar mi ubicación», y `POST /orders` con `Idempotency-Key`. Al crearse el pedido, el cliente va a `payment_url`. |
-| `/order/[reference]` | La página a la que vuelve el cliente después de pagar (`return_url` es `SITE_URL/order/{reference}`): lee el pedido en Ami (`GET /orders/{reference}`) y se actualiza sola mientras espera el pago o la aprobación. Solo muestra pedidos hechos desde este navegador. |
-| `/my-orders` | Los pedidos hechos desde este navegador. No busca por teléfono a propósito: cualquiera puede escribir el teléfono de otra persona. |
+| `/order/[reference]` | La página a la que vuelve el cliente después de pagar (`return_url` es `SITE_URL/order/{reference}`): lee el pedido en Ami (`GET /orders/{reference}`) y se actualiza sola mientras espera el pago o la aprobación. Solo muestra pedidos hechos desde este navegador, o de la cuenta con la que el cliente entró. |
+| `/my-orders` | Con «Entrar con Ami», los pedidos de la cuenta del cliente en esta tienda, desde cualquier dispositivo (`GET /customer/orders`); sin sesión, los hechos desde este navegador. No busca por teléfono a propósito: cualquiera puede escribir el teléfono de otra persona. |
+| `/auth/ami` | «Entrar con Ami»: pide el inicio de sesión (`POST /customer/sign-in`), y `/auth/ami/callback` cambia el código por el token del cliente, que guarda en una cookie `httpOnly` (`lib/customer.ts`). El checkout se llena con su cuenta y puede guardar la dirección del delivery. |
+| `/policies/[key]` | Las políticas del negocio (devoluciones, privacidad…), enlazadas en el pie de página desde `store.policies` (`GET /policies/{key}`). |
+| `/sitemap.xml`, `/robots.txt` | Para los buscadores: la página de cada producto, y Schema.org `Product` en cada una (`lib/structured-data.ts`). |
 | `/appointments` | Solo si la tienda tiene el módulo de citas: servicio, día y hora, datos y `POST /booking/appointments`. |
 | `/api/ami/webhook` | Recibe los webhooks de Ami, verifica la firma `Ami-Signature` e invalida el catálogo con `catalog.changed`. |
 
 Toda llamada a Ami sale del servidor, desde `lib/ami.ts`, el único archivo que
-lee `AMI_API_KEY`.
+lee `AMI_API_KEY`. El token del cliente que entró con su cuenta tampoco llega
+al navegador: vive en una cookie `httpOnly` que solo lee el servidor.
 
 ### Dólares o bolívares
 

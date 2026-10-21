@@ -1,6 +1,6 @@
 ---
 name: ami-storefront
-description: Construye o modifica una tienda en línea propia que vende con Ami a través de la API de tiendas (api.amiagente.com/v1/storefront) — catálogo, carrito, cotización, pedidos con pago en la página de Ami, citas, reservas, suscripciones y webhooks. Úsalo cuando el proyecto use AMI_API_KEY, llame a api.amiagente.com, o te pidan una tienda, un checkout o un catálogo "conectado a Ami".
+description: Construye o modifica una tienda en línea propia que vende con Ami a través de la API de tiendas (api.amiagente.com/v1/storefront) — catálogo, carrito, cotización, pedidos con pago en la página de Ami, cuentas de clientes («Entrar con Ami»), políticas, citas, reservas, suscripciones y webhooks. Úsalo cuando el proyecto use AMI_API_KEY, llame a api.amiagente.com, o te pidan una tienda, un checkout o un catálogo "conectado a Ami".
 license: MIT
 compatibility: Necesita acceso a api.amiagente.com, una llave de Ami (AMI_API_KEY) y Node.js para scripts/check-key-leak.mjs.
 ---
@@ -11,7 +11,7 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 
 ## Reglas que no se rompen
 
-1. **La llave es del servidor.** `AMI_API_KEY` (`ami_live_…` o `ami_test_…`) solo se lee en código de servidor: route handlers, server actions, server components, o tu backend. Nunca en un componente de cliente, nunca con prefijo `NEXT_PUBLIC_`/`VITE_`/`PUBLIC_`, nunca en el repositorio. En Next.js, el módulo que la usa empieza con `import 'server-only'`. Al terminar, corre `node <ruta-del-skill>/scripts/check-key-leak.mjs` y arregla lo que encuentre.
+1. **La llave es del servidor.** `AMI_API_KEY` (`ami_live_…` o `ami_test_…`) solo se lee en código de servidor: route handlers, server actions, server components, o tu backend. Nunca en un componente de cliente, nunca con prefijo `NEXT_PUBLIC_`/`VITE_`/`PUBLIC_`, nunca en el repositorio. En Next.js, el módulo que la usa empieza con `import 'server-only'`. Lo mismo vale para el token del cliente de «Entrar con Ami» (`ami_cs_…`): va en una cookie `httpOnly`, nunca en el navegador. Al terminar, corre `node <ruta-del-skill>/scripts/check-key-leak.mjs` y arregla lo que encuentre.
 2. **No calcules dinero.** Nunca sumes precios, multipliques por cantidad, calcules envío, IVA, IGTF, descuentos ni bolívares. Muestra los textos que devuelve Ami: `price_text` (o `price_ves_text` si el cliente eligió bolívares), `line_total_text`, `subtotal_text`, `delivery.fee_text`, `taxes[].amount_text`, `total_text`, `total_ves.amount_text`. El total del carrito sale de `POST /quote`, no de tu código.
 3. **El pago no es tuyo.** Crea el pedido con `POST /orders` y redirige al cliente a `payment_url`. No pidas datos bancarios, no subas comprobantes, no integres pasarelas. El cliente vuelve a `return_url`.
 4. **El carrito se cotiza cada vez que cambia.** Muestra `refusals` (y el `refusal` de cada línea) con su `message`, que ya está en español para el cliente. Si `ok` es `false`, no dejes pagar.
@@ -25,9 +25,11 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 2. Mira la tienda real con la llave de prueba antes de diseñar: `curl -H "Authorization: Bearer $AMI_API_KEY" https://api.amiagente.com/v1/storefront/store` y `/catalog`. Diseña para lo que el negocio vende (presentaciones, opciones, servicios, módulos).
 3. Sigue [references/flujo-de-compra.md](references/flujo-de-compra.md) para el carrito, la cotización, el pedido y el retorno.
 4. Si `store.modules` tiene `booking`, `hotel` o `subscriptions` y te piden eso, ver [references/modulos.md](references/modulos.md).
-5. Webhooks: [references/webhooks.md](references/webhooks.md).
-6. Prueba de punta a punta con la llave de prueba ([references/modo-de-prueba.md](references/modo-de-prueba.md)): crea un pedido, abre `payment_url`, pulsa **Simular pago aprobado**, vuelve a tu sitio y comprueba que muestra el pedido pagado.
-7. Corre el chequeo de la llave y el build del proyecto.
+5. Si te piden que los clientes inicien sesión, «Mis pedidos» en cualquier dispositivo o direcciones guardadas: «Entrar con Ami», [references/cuentas.md](references/cuentas.md). No construyas un login propio con contraseñas.
+6. Webhooks: [references/webhooks.md](references/webhooks.md).
+7. Prueba de punta a punta con la llave de prueba ([references/modo-de-prueba.md](references/modo-de-prueba.md)): crea un pedido, abre `payment_url`, pulsa **Simular pago aprobado**, vuelve a tu sitio y comprueba que muestra el pedido pagado.
+8. Para buscadores y agentes de IA: un `sitemap.xml` con la página de cada producto, y Schema.org `Product` en cada una (`price` sin formato, `priceCurrency` = `catalog.currency`, `availability` según `sold_out`/`backorder`). El pie de página enlaza las políticas de `store.policies` (su texto: `GET /policies/{key}`).
+9. Corre el chequeo de la llave y el build del proyecto.
 
 ## Rechazos que vas a ver (`refusals[].code`)
 
@@ -44,4 +46,6 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 - Pedir `/products/{id}` por cada tarjeta para armar «Qué incluye» o «Se lleva junto con»: los ids de `includes`, `accessories` y `related` están en el mismo catálogo.
 - Reintentar `POST /orders` sin `Idempotency-Key` y crear el pedido dos veces.
 - Guardar la referencia del pedido en una cookie para la página de retorno: no hace falta, pon `{reference}` en `return_url` (`https://tusitio.com/order/{reference}`).
-- Exponer `GET /orders?phone=` sin verificar al cliente (ver [references/flujo-de-compra.md](references/flujo-de-compra.md) § 6).
+- Exponer `GET /orders?phone=` sin verificar al cliente (ver [references/flujo-de-compra.md](references/flujo-de-compra.md) § 6). Para «Mis pedidos» en cualquier dispositivo, usa «Entrar con Ami» y `GET /customer/orders`.
+- Escribir a mano las políticas del negocio (devoluciones, privacidad): salen de `store.policies` y `GET /policies/{key}`.
+- Renovar todo el catálogo con cada `catalog.changed`: el evento dice qué productos cambiaron (`products.added/changed/removed`); solo con `truncated: true` renueva todo.

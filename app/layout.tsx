@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import type { CSSProperties, ReactNode } from 'react'
 import { getStore, setupProblem } from '@/lib/ami'
 import { currencyFor } from '@/lib/currency-server'
+import { signedIn } from '@/lib/customer'
 import { brandColor } from '@/lib/store-options'
 import type { Store } from '@/lib/types'
 import { SetupNotice, type SetupProblem } from '@/components/notices'
@@ -43,6 +44,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     problem = setupProblem(error)
   }
   const currency = await currencyFor(store)
+  const customer = store ? await signedIn() : null
 
   return (
     <html lang="es-VE" className={inter.variable}>
@@ -61,7 +63,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             Modo de prueba: los pedidos son simulados y no llegan al negocio.
           </p>
         )}
-        <SiteHeader store={store} currency={currency} />
+        <SiteHeader store={store} currency={currency} customer={customer} />
         <main id="contenido" className="pb-24">
           {problem ? (
             <div className="mx-auto max-w-3xl px-4 pt-10">

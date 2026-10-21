@@ -6,6 +6,9 @@ Evento: `{id, object: 'event', type, created, livemode, data: {object, previous?
 
 Tipos: `order.created`, `order.updated`, `appointment.created`, `appointment.updated`, `stay.created`, `stay.updated`, `subscription.created`, `subscription.updated`, `catalog.changed`, `ping`.
 
+- `*.updated` llega cuando cambia **cualquier cosa** de lo que responde la API (estado, pago, líneas, envío, guía, hora de la cita), no solo el `status`. `data.previous` trae el valor anterior de cada campo que cambió, y siempre `status` y `payment_status`.
+- `catalog.changed`: `data.object` = `{object: 'catalog_change', etag, products: {added, changed, removed}, categories_changed, truncated}`. `etag` es el que responde ahora `GET /catalog`. Renueva solo esos productos; con `truncated: true` (más de 500), renueva todo.
+
 ## Verificar (obligatorio)
 
 Encabezado `Ami-Signature: t=<unix>,v1=<hex>`; `v1 = HMAC-SHA256(secret, "<t>.<cuerpo crudo>")`. Rechaza firmas que no coincidan y `t` de hace más de 5 minutos.
@@ -28,6 +31,9 @@ export async function POST(req: Request) {
 
   const event = JSON.parse(raw)
   if (event.type === 'catalog.changed') revalidateTag('catalog', { expire: 0 })  // Next 16
+  // With per-product tags, renew only what moved:
+  // const { products, truncated } = event.data.object
+  // for (const id of [...products.added, ...products.changed, ...products.removed]) revalidateTag(`product-${id}`, { expire: 0 })
   return new Response('ok')
 }
 ```

@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation'
 import { getCatalog, getProduct, getStore } from '@/lib/ami'
 import type { Currency } from '@/lib/currency'
 import { currencyFor } from '@/lib/currency-server'
+import { siteUrl } from '@/lib/site'
+import { jsonLdText, productJsonLd } from '@/lib/structured-data'
 import type { Part, Product } from '@/lib/types'
 import { AddToCart } from '@/components/add-to-cart'
 import { Description } from '@/components/description'
@@ -18,7 +20,15 @@ type Props = { params: Promise<{ id: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct((await params).id).catch(() => null)
-  return product ? { title: product.name } : {}
+  if (!product) return {}
+  const image = product.image_full_url ?? product.image_url
+  return {
+    title: product.name,
+    description: product.description.slice(0, 160) || undefined,
+    alternates: { canonical: `${siteUrl()}/product/${encodeURIComponent(product.id)}` },
+    // What a link to this product unfurls as in WhatsApp or Instagram.
+    openGraph: { title: product.name, ...(image ? { images: [image] } : {}) },
+  }
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -39,8 +49,13 @@ export default async function ProductPage({ params }: Props) {
   // one on each size, so the first size's list stands for the page.
   const parts = product.includes?.length ? product.includes : (product.variants[0]?.includes ?? [])
 
+  const url = `${siteUrl()}/product/${encodeURIComponent(product.id)}`
+  const structured = productJsonLd(product, catalog.currency, url, store.name)
+
   return (
     <div className="mx-auto max-w-7xl space-y-16 px-4 pt-6 sm:px-6">
+      {/* Schema.org for search engines: the product, its price and whether it is in stock. */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdText(structured) }} />
       <Link href="/#coleccion" className="link-line inline-flex items-center gap-1.5 text-[13px] text-muted hover:text-ink">
         <ArrowLeftIcon width={14} height={14} /> Volver a la tienda
       </Link>

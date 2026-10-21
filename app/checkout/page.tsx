@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getCatalog, getStore } from '@/lib/ami'
+import { signedIn } from '@/lib/customer'
 import { currencyFor } from '@/lib/currency-server'
 import { productLookup } from '@/lib/catalog-lookup'
 import { offeredFulfillment, pickupSlots } from '@/lib/store-options'
@@ -13,7 +14,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = { title: 'Finalizar compra' }
 
 export default async function CheckoutPage() {
-  const [store, catalog] = await Promise.all([getStore(), getCatalog()])
+  const [store, catalog, account] = await Promise.all([getStore(), getCatalog(), signedIn()])
   const fulfillments = offeredFulfillment(store)
   const currency = await currencyFor(store)
 
@@ -37,6 +38,7 @@ export default async function CheckoutPage() {
           deliveryTerms={store.delivery_terms_text}
           discounts={Boolean(store.modules?.discounts)}
           currency={currency}
+          account={account}
         />
       )}
     </div>

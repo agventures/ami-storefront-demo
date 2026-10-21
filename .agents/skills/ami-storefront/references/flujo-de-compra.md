@@ -137,4 +137,6 @@ Usa `order.stage_text`, `order.lines`, `order.total_text` y `order.fulfillment_t
 
 ## 6. «Mis pedidos»
 
-`GET /orders?phone=` lista los pedidos de tu sitio para un teléfono. **No lo expongas a cualquiera que escriba un número**: quien conozca el teléfono de otra persona vería sus pedidos. Pide antes que el cliente demuestre que es suyo (tu propio inicio de sesión, o un código que le envías), o muestra solo los pedidos que guardaste en su navegador. Actualiza la página cada pocos segundos mientras esté en `awaiting_payment` o `pending_approval`.
+Con «Entrar con Ami» ([cuentas.md](cuentas.md)): `GET /customer/orders` con el token del cliente, en cualquier dispositivo. Es lo recomendado.
+
+`GET /orders?phone=` lista los pedidos de tu sitio para un teléfono. **No lo expongas a cualquiera que escriba un número**: quien conozca el teléfono de otra persona vería sus pedidos. Pide antes que el cliente demuestre que es suyo, o muestra solo los pedidos que guardaste en su navegador. Actualiza la página cada pocos segundos mientras esté en `awaiting_payment` o `pending_approval`.

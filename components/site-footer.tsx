@@ -65,6 +65,14 @@ export function SiteFooter({ store }: { store: Store | null }) {
                 Carrito
               </Link>
             </li>
+            {/* The shop's own policies (Ajustes › Políticas), from GET /store. */}
+            {store?.policies?.map((policy) => (
+              <li key={policy.key}>
+                <Link href={`/policies/${encodeURIComponent(policy.key)}`} className="link-line">
+                  {policy.title}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </div>

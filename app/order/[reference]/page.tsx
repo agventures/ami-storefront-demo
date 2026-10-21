@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getOrder } from '@/lib/ami'
+import { getAccountOrder, getOrder } from '@/lib/ami'
+import { customerToken } from '@/lib/customer'
 import { rememberedOrders } from '@/lib/site'
 import { OrderDetails } from '@/components/order-details'
 
@@ -16,9 +17,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // The `return_url` of every order (`/order/{reference}`), and «Mis pedidos»'
 // link. Coming back here proves nothing (rule 6): the page asks Ami. And a
 // reference is not a password: the site's key reads every order the site
-// made, so the page shows only the ones this browser placed.
+// made, so the page shows only the ones this browser placed — or, signed in
+// with «Entrar con Ami», the account's own (GET /customer/orders/{reference}).
 export default async function OrderPage({ params }: Props) {
   const reference = (await params).reference.toUpperCase()
+  const token = await customerToken()
+  const mine = token ? await getAccountOrder(token, reference) : null
+  if (mine) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-5 px-4 pt-10">
+        <h1 className="text-3xl font-medium tracking-tight">Tu pedido</h1>
+        <OrderDetails order={mine} />
+      </div>
+    )
+  }
   if (!(await rememberedOrders()).includes(reference)) {
     return (
       <div className="mx-auto max-w-xl space-y-4 px-4 py-10 text-center">

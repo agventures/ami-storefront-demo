@@ -1,5 +1,6 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import {
   AmiError,
   createAppointment,
@@ -9,6 +10,7 @@ import {
   quote as quoteApi,
 } from '@/lib/ami'
 import { toCartLines } from '@/lib/cart'
+import { CUSTOMER_COOKIE, customerToken } from '@/lib/customer'
 import { rememberAppointment, rememberOrder, siteUrl } from '@/lib/site'
 import { offeredFulfillment } from '@/lib/store-options'
 import type { Appointment, BookingSlots, CartRequest, Fulfillment, Pin, Quote, Refusal } from '@/lib/types'
@@ -94,6 +96,9 @@ export type PlaceOrderInput = CartInput & {
   attemptId: string
   customer: { name?: string; phone?: string; cedula?: string; email?: string }
   note?: string
+  /** Signed in: the saved address the delivery goes to, or the name to keep a new one under. */
+  savedAddressId?: string
+  saveAddressLabel?: string
 }
 
 export type PlaceOrderResult =
@@ -140,10 +145,22 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     return refuse('Comparte tu ubicación para calcular el delivery.')
   }
 
+  // «Entrar con Ami»: the order goes into the signed-in account, read from
+  // this server's own cookie — never from what the browser sent.
+  const token = await customerToken()
+  const book: { saved_address_id?: string; save_address_label?: string } = {}
+  if (token && request.fulfillment === 'delivery') {
+    const savedId = text(input.savedAddressId, 40)
+    const label = text(input.saveAddressLabel, 40)
+    if (savedId) book.saved_address_id = savedId
+    else if (label) book.save_address_label = label
+  }
+
   try {
     const order = await createOrder(
       {
         ...request,
+        ...book,
         customer,
         note: text(input.note, 300),
         // Ami puts the order's reference where `{reference}` is.
@@ -151,6 +168,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         metadata: { checkout_attempt: attemptId },
       },
       attemptId,
+      token,
     )
     await rememberOrder(order.reference)
     return { status: 'created', reference: order.reference, paymentUrl: order.payment_url }
@@ -158,6 +176,11 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     if (error instanceof AmiError && error.code === 'order_refused') {
       const quote = (error.body as { error?: { quote?: Quote } } | null)?.error?.quote ?? null
       return { status: 'refused', message: error.message, refusals: quote?.refusals ?? [], quote }
+    }
+    if (error instanceof AmiError && error.code === 'invalid_customer_token') {
+      // Signed out on Ami meanwhile: this browser is a guest again.
+      ;(await cookies()).delete(CUSTOMER_COOKIE)
+      return refuse('Tu sesión terminó. Vuelve a intentarlo: compras como invitado, o entra otra vez con tu cuenta.')
     }
     if (error instanceof AmiError && error.status >= 400 && error.status < 500 && error.status !== 429) {
       return refuse(customerMessage(error))

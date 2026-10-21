@@ -2,6 +2,7 @@
 
 Con `ami_test_…`: lecturas reales, escrituras simuladas. Referencias que empiezan con `T`, `livemode: false`. Nada llega al panel del negocio.
 
+- «Entrar con Ami» es real con una llave de prueba (entras con tu cuenta; `redirect_uri` puede ser `http://localhost`). Lo que cambias en la cuenta cambia de verdad; los pedidos siguen siendo de prueba.
 - La `payment_url` de un objeto de prueba muestra **Simular pago aprobado**, **Simular comprobante enviado** y **Simular rechazo del banco**.
 - `POST /test/{tipo}/{reference}/advance` `{"to": paso}` hace lo que haría el negocio y envía el webhook:
 
