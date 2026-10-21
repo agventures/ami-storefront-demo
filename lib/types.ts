@@ -66,7 +66,8 @@ export type Category = {
   id: string
   name: string
   position: number
-  /** The group it sits in, or null on the first level. */
+  /** The category a subcategory sits in, or null for a category. Its id
+   *  survives a rename, so it is safe in a URL. */
   parent_id?: string | null
 }
 
@@ -130,8 +131,12 @@ export type Product = {
   id: string
   name: string
   description: string
+  /** The top-level category, even when the product is in a subcategory. */
   category: string
   category_id: string
+  /** The subcategory under it, or null when it is filed at the top. */
+  subcategory?: string | null
+  subcategory_id?: string | null
   kind: ProductKind | (string & {})
   brand?: string | null
   sku?: string | null

@@ -11,7 +11,9 @@ export const dynamic = 'force-dynamic'
 
 type Section = { id: string; name: string; products: Product[] }
 
-/** Categories in the store's order; products without a known one go last. */
+/** Categories in the store's order — the top level, which every product's
+ *  `category_id` names even when it sits in a subcategory; products without
+ *  a known one go last. */
 function sections(categories: Category[], products: Product[]): Section[] {
   const ordered = [...categories].sort((a, b) => a.position - b.position)
   const byId = new Map<string, Section>(ordered.map((c) => [c.id, { id: c.id, name: c.name, products: [] }]))

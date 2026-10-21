@@ -50,7 +50,11 @@ export default async function ProductPage({ params }: Props) {
 
         <div className="space-y-8 md:sticky md:top-24 md:self-start md:pt-4">
           <div className="space-y-3">
-            {product.category && <p className="eyebrow">{product.category}</p>}
+            {product.category && (
+              <p className="eyebrow">
+                {product.subcategory ? `${product.category} › ${product.subcategory}` : product.category}
+              </p>
+            )}
             {product.brand ? <p className="text-sm text-muted">{product.brand}</p> : null}
             <h1 className="text-3xl font-medium tracking-tight text-balance sm:text-4xl">{product.name}</h1>
             <p className="flex flex-wrap items-center gap-3 text-lg tabular-nums">
