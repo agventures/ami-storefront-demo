@@ -8,7 +8,7 @@ Errores: `{"error": {"code": "...", "message": "..."}}` — `code` en inglés (p
 
 | Método | Ruta | Devuelve |
 | --- | --- | --- |
-| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}`, `policies[] {key, title}` |
+| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `closed_note` (por qué está cerrado, en palabras del negocio, si lo cerró a mano y lo dijo; si no, `null`), `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}`, `policies[] {key, title}` |
 | GET | `/policies` · `/policies/{key}` | Las políticas del negocio (devoluciones, privacidad, términos): `{object: 'policy', key, title, body}`. `body` es texto plano con párrafos separados por líneas en blanco. |
 | GET | `/catalog` | `currency`, `categories[] {id, name, position, parent_id}`, `products[]` (ver abajo). Con `ETag`; `If-None-Match` → `304`. |
 | GET | `/products/{id}` | Un producto, por su `id` o por su código (SKU) |

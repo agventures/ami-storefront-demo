@@ -136,7 +136,8 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     return { status: 'error', message: customerMessage(error) }
   }
   if (!store.accepts_orders_now) {
-    return refuse(`La tienda no está recibiendo pedidos ahora. ${store.hours_text}`.trim())
+    const said = [store.closed_note, store.hours_text].filter(Boolean).join('. ')
+    return refuse(`La tienda no está recibiendo pedidos ahora. ${said}`.trim())
   }
   if (!offeredFulfillment(store).includes(request.fulfillment)) {
     return refuse('Elige una forma de entrega disponible.')

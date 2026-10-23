@@ -15,7 +15,7 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 2. **No calcules dinero.** Nunca sumes precios, multipliques por cantidad, calcules envío, IVA, IGTF, descuentos ni bolívares. Muestra los textos que devuelve Ami: `price_text` (o `price_ves_text` si el cliente eligió bolívares), `line_total_text`, `subtotal_text`, `delivery.fee_text`, `taxes[].amount_text`, `total_text`, `total_ves.amount_text`. El total del carrito sale de `POST /quote`, no de tu código.
 3. **El pago no es tuyo.** Crea el pedido con `POST /orders` y redirige al cliente a `payment_url`. No pidas datos bancarios, no subas comprobantes, no integres pasarelas. El cliente vuelve a `return_url`.
 4. **El carrito se cotiza cada vez que cambia.** Muestra `refusals` (y el `refusal` de cada línea) con su `message`, que ya está en español para el cliente. Si `ok` es `false`, no dejes pagar.
-5. **Respeta la tienda.** Si `GET /store` dice `accepts_orders_now: false`, muestra `hours_text` y no ofrezcas pagar. Ofrece solo las entregas de `store.fulfillment`. No dejes agregar productos con `sold_out: true`; uno con `backorder: true` sí se compra, y se muestra «Por encargo».
+5. **Respeta la tienda.** Si `GET /store` dice `accepts_orders_now: false`, muestra `hours_text` —y `closed_note`, el motivo que dio el negocio, cuando no es `null`— y no ofrezcas pagar. Ofrece solo las entregas de `store.fulfillment`. No dejes agregar productos con `sold_out: true`; uno con `backorder: true` sí se compra, y se muestra «Por encargo».
 6. **El estado del pedido sale de Ami.** La página de retorno lee `GET /orders/{reference}`; no supongas que se pagó porque el cliente volvió.
 7. **Textos para el cliente en español; código en inglés.**
 

@@ -37,6 +37,8 @@ export type Store = {
   color: string | null
   open: boolean
   hours_text: string
+  /** Why it is closed, in the shop's words, when it closed by hand and said. */
+  closed_note?: string | null
   week?: WeekDay[]
   accepts_orders_now: boolean
   fulfillment: Partial<Record<Fulfillment, unknown>> & Record<string, unknown>

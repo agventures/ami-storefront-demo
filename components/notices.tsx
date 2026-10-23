@@ -4,7 +4,7 @@ import type { Store } from '@/lib/types'
 import { AlertIcon, ClockIcon } from './icons'
 
 /** Rule 5: when the store does not take orders, say when it does. */
-export function ClosedBanner({ store }: { store: Pick<Store, 'accepts_orders_now' | 'hours_text'> }) {
+export function ClosedBanner({ store }: { store: Pick<Store, 'accepts_orders_now' | 'hours_text' | 'closed_note'> }) {
   if (store.accepts_orders_now) return null
   return (
     <div role="status" className="flex items-start gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
@@ -12,6 +12,8 @@ export function ClosedBanner({ store }: { store: Pick<Store, 'accepts_orders_now
       <p>
         <strong className="font-semibold">Cerrado</strong>
         {store.hours_text ? <> · {store.hours_text}</> : null}
+        {/* The shop's own reason, when it closed by hand and gave one. */}
+        {store.closed_note ? <span className="block">{store.closed_note}</span> : null}
         <span className="block text-amber-800/80">Puedes ver el catálogo y armar tu carrito; los pedidos se reciben en el horario de la tienda.</span>
       </p>
     </div>
