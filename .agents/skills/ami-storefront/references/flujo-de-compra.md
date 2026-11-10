@@ -68,6 +68,8 @@ export async function quote(lines: CartLine[], delivery: DeliveryChoice) {
 
 **Con qué entrega cotizar antes del checkout**: con `pickup` si la tienda lo ofrece; si solo ofrece `delivery`, cotiza `delivery` sin `pin` — la cotización no lo rechaza, solo deja el envío pendiente (`delivery.pending: true`). `pin_required` solo aparece al crear el pedido.
 
+**Si la tienda cobra el delivery por zona** (`store.delivery_zones` no está vacío): además de la ubicación, el cliente elige su zona en un `<select>` con esos nombres y la mandas tal cual en `zone`. Sin ella la cotización deja el envío pendiente y el pedido se rechaza con `zone_required`. No ofrezcas escribir una zona que no esté en la lista: Ami la rechaza.
+
 Llámala cuando cambie el carrito (con un pequeño debounce) y pinta exactamente lo que devuelve: `lines[i].line_total_text`, `subtotal_text`, `discount_text`, `delivery.fee_text`, `taxes`, `igtf_text`, `total_text`. Las líneas vienen en el mismo orden que mandaste. Muestra cada `refusal.message`.
 
 ## 4. El checkout

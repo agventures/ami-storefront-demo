@@ -37,6 +37,7 @@ export type CartInput = {
   fulfillment: string
   pickupAt?: string
   pin?: unknown
+  zone?: string
   address?: string
   referencePoint?: string
   code?: string
@@ -55,6 +56,9 @@ function cartRequest(input: CartInput): CartRequest {
   if (fulfillment === 'delivery') {
     const pin = toPin(input.pin)
     if (pin) request.pin = pin
+    // Only for a shop that charges by zone; Ami checks it against its list.
+    const zone = text(input.zone, 80)
+    if (zone) request.zone = zone
     request.address = text(input.address, 400)
     request.reference_point = text(input.referencePoint, 100)
   }

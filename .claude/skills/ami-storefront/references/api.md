@@ -8,7 +8,7 @@ Errores: `{"error": {"code": "...", "message": "..."}}` — `code` en inglés (p
 
 | Método | Ruta | Devuelve |
 | --- | --- | --- |
-| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `closed_note` (por qué está cerrado, en palabras del negocio, si lo cerró a mano y lo dijo; si no, `null`), `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}`, `policies[] {key, title}` |
+| GET | `/store` | `name`, `currency`, `logo_url`, `color`, `open`, `hours_text`, `closed_note` (por qué está cerrado, en palabras del negocio, si lo cerró a mano y lo dijo; si no, `null`), `accepts_orders_now`, `fulfillment {pickup, delivery, shipping}`, `delivery_terms_text`, `delivery_zones` (las zonas entre las que elige el cliente si la tienda cobra el delivery por zona; vacío si no), `min_order_text`, `exchange {rate, rate_text, source, as_of}` (la tasa a la que la tienda pasa sus dólares a bolívares; `null` si vende en bolívares o no tiene tasa hoy), `pickup_slots`, `shipping`, `modules {booking, hotel, subscriptions, discounts}`, `policies[] {key, title}` |
 | GET | `/policies` · `/policies/{key}` | Las políticas del negocio (devoluciones, privacidad, términos): `{object: 'policy', key, title, body}`. `body` es texto plano con párrafos separados por líneas en blanco. |
 | GET | `/catalog` | `currency`, `categories[] {id, name, position, parent_id}`, `products[]` (ver abajo). Con `ETag`; `If-None-Match` → `304`. |
 | GET | `/products/{id}` | Un producto, por su `id` o por su código (SKU) |
@@ -29,6 +29,7 @@ Cuerpo del carrito (igual en `/quote` y `/orders`):
   "fulfillment": "pickup | delivery | shipping",
   "pickup_at": "ahora | una de store.pickup_slots",
   "pin": { "latitude": 10.49, "longitude": -66.85 },
+  "zone": "una de store.delivery_zones, si la tienda cobra el delivery por zona",
   "address": "", "reference_point": "",
   "shipping": { "carrier": "zoom", "office": { "id": "…" }, "recipient": { "name": "", "cedula": "", "phone": "" } },
   "code": "CUPON",

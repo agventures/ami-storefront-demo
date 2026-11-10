@@ -43,6 +43,8 @@ export type Store = {
   accepts_orders_now: boolean
   fulfillment: Partial<Record<Fulfillment, unknown>> & Record<string, unknown>
   delivery_terms_text: string
+  /** The zones a customer picks from when the shop charges delivery by zone. */
+  delivery_zones?: string[]
   min_order: string
   min_order_text: string
   /** Null for a store that sells in bolívares, or with no rate today. */
@@ -205,6 +207,8 @@ export type CartRequest = {
   fulfillment: Fulfillment
   pickup_at?: string
   pin?: Pin | null
+  /** One of `store.delivery_zones`, when the shop charges delivery by zone. */
+  zone?: string
   address?: string
   reference_point?: string
   code?: string

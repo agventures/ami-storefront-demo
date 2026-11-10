@@ -36,6 +36,7 @@ export default async function CheckoutPage() {
           fulfillments={fulfillments}
           pickupSlots={pickupSlots(store)}
           deliveryTerms={store.delivery_terms_text}
+          deliveryZones={store.delivery_zones ?? []}
           discounts={Boolean(store.modules?.discounts)}
           currency={currency}
           account={account}

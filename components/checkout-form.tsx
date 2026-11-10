@@ -26,6 +26,7 @@ export function CheckoutForm({
   fulfillments,
   pickupSlots,
   deliveryTerms,
+  deliveryZones,
   discounts,
   currency,
   account,
@@ -34,6 +35,8 @@ export function CheckoutForm({
   fulfillments: Fulfillment[]
   pickupSlots: PickupSlot[]
   deliveryTerms: string
+  /** `store.delivery_zones`: the zones a delivery is priced by, or none. */
+  deliveryZones: string[]
   discounts: boolean
   currency: Currency
   /** «Entrar con Ami»: the signed-in account fills the form, or null. */
@@ -51,6 +54,7 @@ export function CheckoutForm({
   const [fulfillment, setFulfillment] = useState<Fulfillment>(fulfillments[0])
   const [pickupAt, setPickupAt] = useState('ahora')
   const [pin, setPin] = useState<Pin | null>(first?.pin ?? null)
+  const [zone, setZone] = useState('')
   const [address, setAddress] = useState(first?.address ?? '')
   const [referencePoint, setReferencePoint] = useState(first?.reference_point ?? '')
   // A saved address the delivery goes to, or '' for a new one — which a
@@ -81,6 +85,7 @@ export function CheckoutForm({
     fulfillment,
     pickupAt,
     pin,
+    zone,
     address,
     referencePoint,
     code: discounts ? code : '',
@@ -88,12 +93,18 @@ export function CheckoutForm({
   const { quote, error: quoteError, loading, fresh } = useQuote(lines.length ? cart : null, { nonce })
 
   const needsPin = fulfillment === 'delivery' && !pin
+  // A shop that charges by zone prices the delivery from the zone, so an
+  // order cannot be placed without one (`zone_required`).
+  const needsZone = fulfillment === 'delivery' && deliveryZones.length > 0 && !zone
   const needsAddress = fulfillment === 'delivery' && !address.trim()
   const required = Boolean(name.trim() && phone.trim() && cedula.trim())
   // Rule 4: only a fresh quote that Ami says is ok can be paid.
-  const canPay = Boolean(fresh && quote?.ok && required && !needsPin && !needsAddress && !submitting)
+  const canPay = Boolean(fresh && quote?.ok && required && !needsPin && !needsZone && !needsAddress && !submitting)
   // The location prompt below already says what `pin_required` says.
-  const refusals = quote && fresh ? globalRefusals(quote, (r) => r.code === 'pin_required' && needsPin) : []
+  const refusals = quote && fresh
+    ? globalRefusals(quote, (r) => (r.code === 'pin_required' && needsPin)
+        || (r.code === 'zone_required' && needsZone))
+    : []
 
   function locate() {
     if (!('geolocation' in navigator)) {
@@ -321,6 +332,28 @@ export function CheckoutForm({
                   )}
                 </p>
               </div>
+              {deliveryZones.length > 0 && (
+                <div>
+                  <label htmlFor="zone" className="label">
+                    Zona
+                  </label>
+                  <select
+                    id="zone"
+                    required
+                    value={zone}
+                    onChange={(e) => setZone(e.target.value)}
+                    className="field"
+                  >
+                    <option value="">Elige tu zona</option>
+                    {deliveryZones.map((z) => (
+                      <option key={z} value={z}>
+                        {z}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-sm text-muted">El delivery se cobra según la zona.</p>
+                </div>
+              )}
               <div>
                 <label htmlFor="address" className="label">
                   Dirección

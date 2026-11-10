@@ -33,13 +33,14 @@ Estás construyendo el sitio de un negocio que vende con **Ami**. Ami es el sist
 
 ## Rechazos que vas a ver (`refusals[].code`)
 
-`closed` (tienda cerrada), `min_order`, `out_of_stock`, `unavailable` (el negocio lo apagó), `variant_required`, `missing_modifier`/`unknown_modifier` (opciones), `not_offered` (esa entrega no), `pin_required` (delivery sin ubicación, solo al crear), `name_required`, `phone_required`, `phone_invalid`, `cedula_required`, `code` (cupón), `empty`. Muestra siempre el `message`, que ya está en español.
+`closed` (tienda cerrada), `min_order`, `out_of_stock`, `unavailable` (el negocio lo apagó), `variant_required`, `missing_modifier`/`unknown_modifier` (opciones), `not_offered` (esa entrega no), `pin_required` (delivery sin ubicación, solo al crear), `zone_required` (delivery sin zona en una tienda que cobra por zona, solo al crear), `name_required`, `phone_required`, `phone_invalid`, `cedula_required`, `code` (cupón), `empty`. Muestra siempre el `message`, que ya está en español.
 
 ## Errores comunes que debes evitar
 
 - Guardar el precio en el carrito y sumarlo → usa `POST /quote`.
 - Mandar `variant_id` de un producto sin presentaciones, u olvidarlo en uno que sí las tiene (`variant_required`).
 - Crear un delivery sin `pin` (`pin_required`): pide la ubicación con `navigator.geolocation` en el cliente y mándala a tu servidor.
+- Crear un delivery sin `zone` en una tienda que cobra por zona (`store.delivery_zones` trae la lista; `zone_required` si falta o no es de la lista).
 - Olvidar la cédula del cliente: `customer.name`, `customer.phone` y `customer.cedula` son obligatorios para crear el pedido.
 - Pedir el catálogo en cada visita sin caché: usa `ETag`/`If-None-Match` o revalida con el webhook `catalog.changed`.
 - Inventar un precio de antes, una marca o productos relacionados: salen de `compare_at_text`, `brand`, `accessories` y `related`. Si vienen `null` o vacíos, no muestres nada.
