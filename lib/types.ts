@@ -114,7 +114,9 @@ export type Variant = {
 export type Option = {
   id: string
   name: string
+  /** Signed: an option can take something off the price. */
   price_delta: string
+  /** Ready to print, sign included: «+ 1.00 USD», «− 0.50 USD», or ''. */
   delta_text: string
   sold_out: boolean
 }
@@ -124,6 +126,17 @@ export type OptionGroup = {
   name: string
   min_select: number
   max_select: number | null
+  /** Set on a group the API adds for the day, not one the store wrote:
+   *  `out` while an ingredient is out («Hoy no hay costilla», with what the
+   *  store puts in its place), `on_request` when the customer may ask for
+   *  that swap any day («Cambiar costilla»). `null` on the store's own. */
+  today?: 'out' | 'on_request' | null
+  /** One answer the API adds to the line by itself («Sin costilla»): tell
+   *  the customer, ask nothing, send nothing. */
+  auto?: boolean
+  /** The presentations the group is about; `null` is all of them. An
+   *  answer sent for another presentation is ignored. */
+  variant_ids?: string[] | null
   options: Option[]
 }
 

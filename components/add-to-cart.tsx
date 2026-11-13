@@ -8,9 +8,19 @@ import { cartActions } from './cart-store'
 import { CheckIcon } from './icons'
 import { QuantityStepper } from './quantity-stepper'
 
+/** How many the customer must pick: `min_select`, but never more than the
+ *  options the group lists. The API clamps the same way, so a group written
+ *  «elige 2» that lists one asks for one. A `sold_out` option still counts:
+ *  the API asks for the pick all the same. */
+const floorOf = (group: OptionGroup) => Math.min(group.min_select, group.options.length)
+
 /** What a group asks for, in words: «Elige 1», «Opcional · hasta 3»… */
 function groupHint(group: OptionGroup) {
-  const { min_select: min, max_select: max } = group
+  const min = floorOf(group)
+  // The ceiling clamped the same way: «de 1 a 2» over a single option
+  // promises a second pick there is nothing to make.
+  const max = group.max_select == null
+    ? null : Math.min(group.max_select, group.options.length)
   if (min <= 0) return max ? `Opcional · hasta ${max}` : 'Opcional'
   if (max === min) return `Elige ${min}`
   if (max == null) return `Elige al menos ${min}`
@@ -18,7 +28,20 @@ function groupHint(group: OptionGroup) {
 }
 
 const groupIsValid = (group: OptionGroup, chosen: string[]) =>
-  chosen.length >= group.min_select && (group.max_select == null || chosen.length <= group.max_select)
+  chosen.length >= floorOf(group) && (group.max_select == null || chosen.length <= group.max_select)
+
+/** The groups one presentation is asked. A group the API adds for the day
+ *  (`today`) may be about only some presentations (`variant_ids`); an answer
+ *  for another one is ignored, so it is not asked. A product sold one way is
+ *  asked all of its groups. */
+const groupsFor = (product: Product, variantId: string | null) =>
+  product.option_groups.filter(
+    (g) => product.variants.length === 0 || !g.variant_ids?.length || (variantId != null && g.variant_ids.includes(variantId)),
+  )
+
+/** «Sin costilla» → «Hoy va sin costilla»: what an `auto` group says. */
+const todayNotice = (names: string[]) =>
+  `Hoy va ${names.map((n) => n.charAt(0).toLowerCase() + n.slice(1)).join(' y ')}`
 
 function initialVariant(product: Product) {
   const available = product.variants.filter((v) => !v.sold_out)
@@ -37,7 +60,12 @@ export function AddToCart({ product, currency }: { product: Product; currency: C
   const [full, setFull] = useState(false)
 
   const variant = product.variants.find((v) => v.variant_id === variantId) ?? null
-  const invalidGroup = product.option_groups.find((g) => !groupIsValid(g, chosen[g.id] ?? []))
+  const asked = groupsFor(product, variantId)
+  // An `auto` group is not a question: the API adds its one answer to the
+  // line by itself, so the page says it and sends nothing.
+  const given = asked.filter((g) => g.auto).flatMap((g) => g.options.slice(0, 1).map((o) => o.name))
+  const groups = asked.filter((g) => !g.auto)
+  const invalidGroup = groups.find((g) => !groupIsValid(g, chosen[g.id] ?? []))
 
   const blocker = product.sold_out
     ? 'Agotado'
@@ -67,7 +95,7 @@ export function AddToCart({ product, currency }: { product: Product; currency: C
       product_id: product.id,
       // Only products with presentations take a variant_id (`variant_required`).
       variant_id: hasVariants ? variantId : null,
-      options: product.option_groups.flatMap((g) => chosen[g.id] ?? []),
+      options: groups.flatMap((g) => chosen[g.id] ?? []),
       note: note.trim(),
       quantity,
     })
@@ -91,13 +119,19 @@ export function AddToCart({ product, currency }: { product: Product; currency: C
           onChange={(id) => {
             setVariantId(id)
             setAdded(false)
+            // An answer belongs to its question: drop the ones whose group
+            // is not asked of the new presentation.
+            const kept = new Set(groupsFor(product, id).map((g) => g.id))
+            setChosen((prev) => Object.fromEntries(Object.entries(prev).filter(([groupId]) => kept.has(groupId))))
           }}
         />
       )}
 
-      {product.option_groups.map((group) => {
+      {given.length > 0 && <p className="text-sm text-muted">{todayNotice(given)}</p>}
+
+      {groups.map((group) => {
         const picked = chosen[group.id] ?? []
-        const radio = group.min_select === 1 && group.max_select === 1
+        const radio = floorOf(group) === 1 && group.max_select === 1
         const atMax = group.max_select != null && group.max_select > 1 && picked.length >= group.max_select
         return (
           <fieldset key={group.id}>
